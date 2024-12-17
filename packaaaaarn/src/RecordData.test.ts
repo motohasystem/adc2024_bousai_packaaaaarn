@@ -16,8 +16,8 @@ const mockData = {
                             id: { S: "1001" },
                             value: {
                                 M: {
-                                    回答項目: { M: { value: { S: "回答1" } } },
-                                    リスクポイント: { M: { value: { S: "5" } } },
+                                    回答項目: { M: { value: { S: "回答1" }, type: "string" } }, // 'type' プロパティを追加
+                                    リスクポイント: { M: { value: { S: "5" }, type: "string" } }, // 'type' プロパティを追加
                                 },
                             },
                         },
@@ -31,23 +31,35 @@ const mockData = {
                             id: { S: "2001" },
                             value: {
                                 M: {
-                                    説明: { M: { value: { S: "説明A" } } },
-                                    係数: { M: { value: { S: "2.5" } } },
+                                    説明: { M: { value: { S: "説明A" }, type: "string" } }, // 'type' プロパティを追加
+                                    係数: { M: { value: { S: "2.5" }, type: "string" } }, // 'type' プロパティを追加
                                 },
                             },
                         },
                     },
                 ],
             },
+            備考: { S: "備考A" },
+            カテゴリ: { S: "カテゴリA" },
+            更新者: { M: { name: { S: "更新者A" }, code: { S: "codeB" } } },
+            作成日時: { S: "2024-12-16T04:13:00Z" },
+            レコード番号: { S: "12345" },
+            Systemid: { N: "1" },
+            __appid__: { N: "100" },
+            課題: { S: "課題A" },
+            Systemrevision: { S: "1.0" },
+            "requestContext.stage": { S: "dev" }
         },
     ],
 };
+
 
 describe("RecordData クラスのテスト", () => {
     let recordData: RecordData;
 
     beforeEach(() => {
-        recordData = new RecordData(mockData);
+        // @ts-ignore
+        return recordData = new RecordData(mockData);
     });
 
     it("getCreators メソッドが正しく作成者情報を取得する", () => {
