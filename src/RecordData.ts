@@ -2,7 +2,7 @@
 export type SValue = { S: string };
 
 // 数値型のデータ
-type NValue = { N: string };
+export type NValue = { N: string };
 
 // NULL値
 type NullValue = { NULL: boolean };

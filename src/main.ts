@@ -15,10 +15,16 @@ const API_KEY = import.meta.env.VITE_API_KEY || '';
 
 function rendering(records: RecordData) {
   try {
+    // HTMLの親要素を取得
+    const parentElement = document.getElementById("app");
+    if (!parentElement) {
+      throw new Error('Parent element not found');
+    }
+
     // @ts-ignore
     const renderer = new RecordHtmlRenderer(records);
-    const htmlContent = renderer.renderCategoryQuestions();
-    document.querySelector<HTMLDivElement>('#app')!.innerHTML += htmlContent;
+    renderer.renderCategoryQuestions(parentElement);
+    // document.querySelector<HTMLDivElement>('#app')!.innerHTML += htmlContent;
   } catch (error) {
     console.error('Error rendering HTML:', error);
   }
