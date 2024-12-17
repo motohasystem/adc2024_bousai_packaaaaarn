@@ -1,4 +1,4 @@
-import { RecordData, SValue, NValue } from "./RecordData";
+import { RecordData, SValue } from "./RecordData";
 
 class RecordHtmlRenderer {
     private recordData: RecordData;
