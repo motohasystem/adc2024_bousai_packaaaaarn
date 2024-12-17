@@ -7,6 +7,7 @@ export default defineConfig({
         globals: true,
         environment: 'jsdom',
     },
+    base: '', // 参照パスを相対パスに設定
     build: {
         outDir: 'docs', // ビルド出力先を "docs" に変更
     },
