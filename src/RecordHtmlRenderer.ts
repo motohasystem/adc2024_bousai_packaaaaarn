@@ -26,7 +26,7 @@ class RecordHtmlRenderer {
         const categories = this.recordData.getCategories();
 
         const title = document.createElement("h1");
-        title.textContent = "防災ぱっかーんアンケート";
+        title.textContent = "防災ぱっかーんスコアリング";
         parentElement.appendChild(title);
 
         categories.forEach((category) => {
