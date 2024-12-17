@@ -2,9 +2,11 @@ import { RecordData, SValue } from "./RecordData";
 
 class RecordHtmlRenderer {
     private recordData: RecordData;
+    private debugMode: boolean;
 
-    constructor(recordData: RecordData) {
+    constructor(recordData: RecordData, debugMode: boolean = false) {
         this.recordData = recordData;
+        this.debugMode = debugMode;
     }
 
     // カテゴリごとにCSSクラス名を取得するメソッド
@@ -24,7 +26,7 @@ class RecordHtmlRenderer {
         const categories = this.recordData.getCategories();
 
         const title = document.createElement("h1");
-        title.textContent = "防災ぱっかーんスコアリング";
+        title.textContent = "防災ぱっかーんアンケート";
         parentElement.appendChild(title);
 
         categories.forEach((category) => {
@@ -39,28 +41,78 @@ class RecordHtmlRenderer {
             items.forEach((item, index) => {
                 const questionDiv = document.createElement("div");
                 questionDiv.className = categoryClass;
+                questionDiv.style.transition = "all 0.5s ease";
 
                 const questionText = document.createElement("p");
                 questionText.textContent = `質問 ${index + 1}: ${item.質問文.S}`;
                 questionDiv.appendChild(questionText);
 
                 const form = document.createElement("form");
+                form.setAttribute("data-question-form", item.レコード番号.S);
                 questionDiv.appendChild(form);
 
                 item.選択肢テーブル.L.forEach((choice) => {
                     // const choiceId = (choice.M.id as SValue).S;
                     const choiceText = (choice.M.value.M.回答項目.M.value as SValue).S;
-                    const choiseRP = (choice.M.value.M.リスクポイント.M.value as SValue).S;
+                    const choiceValue = (choice.M.value.M.リスクポイント.M.value as SValue).S;
 
                     const label = document.createElement("label");
                     const input = document.createElement("input");
                     input.type = "radio";
                     input.name = `question_${item.レコード番号.S}`;
-                    input.value = choiseRP;
+                    input.value = choiceValue;
 
                     label.appendChild(input);
                     label.appendChild(document.createTextNode(choiceText));
                     form.appendChild(label);
+
+                    // イベントリスナーで選択時のアニメーションと表示更新
+                    input.addEventListener("change", () => {
+                        if (input.checked) {
+                            questionText.textContent = `✅ 質問 ${index + 1}: ${item.質問文.S} - 選択: ${choiceText}`;
+
+                            // 選択肢とフォームを非表示
+                            form.style.display = "none";
+
+                            // 質問ブロック全体をアニメーションして縮小
+                            questionDiv.style.transition = "transform 1s ease-in-out, opacity 1s ease-in-out, background-color 1s ease-in-out";
+
+                            questionDiv.style.transform = "scale(1) translateY(-5px)";
+                            questionDiv.style.opacity = "0.7";
+                            questionDiv.style.backgroundColor = "#f0f0f0"; // 背景色を変更
+                        }
+                    });
+                });
+
+                // ホバー時のスタイル追加
+                questionDiv.addEventListener("mouseenter", () => {
+                    questionDiv.style.transform = "scale(1) translateY(-5px)";
+                    questionDiv.style.opacity = "1";
+                    questionDiv.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)";
+                });
+
+                questionDiv.addEventListener("mouseleave", () => {
+                    const hasCheckedInput = questionDiv.querySelector('input[type=radio]:checked');
+                    if (hasCheckedInput != null) {
+                        questionDiv.style.transform = "scale(1) translateY(-5px)";
+                        questionDiv.style.opacity = "0.7";
+                        questionDiv.style.boxShadow = "none";
+                    }
+                    else {
+                        questionDiv.style.transform = "scale(1) translateY(5px)";
+                    }
+                });
+
+                // クリックで再選択可能にする
+                questionDiv.addEventListener("click", () => {
+                    const hasCheckedInput = questionDiv.querySelector('input[type=radio]:checked');
+
+                    if (hasCheckedInput != null) {
+                        form.style.display = "block";
+                        questionText.textContent = `質問 ${index + 1}: ${item.質問文.S}`;
+                        // questionDiv.style.transform = "scale(1)";
+                        // questionDiv.style.opacity = "1";
+                    }
                 });
 
                 parentElement.appendChild(questionDiv);
@@ -80,27 +132,30 @@ class RecordHtmlRenderer {
         button.style.border = "none";
         button.style.borderRadius = "5px";
         button.style.cursor = "pointer";
-
-        // parentElement にボタンを追加する前に確認
-        console.log("Button textContent:", button.textContent);
-
-        // 余計な要素を追加しないことを確認
-        if (button.textContent) {
-            parentElement.appendChild(button);
-        } else {
-            console.error("Button textContent is undefined");
-        }
+        parentElement.appendChild(button);
 
         // 採点ロジック
         const calculateScore = () => {
             console.log("採点ボタンがクリックされました");
-            const inputs = parentElement.querySelectorAll('input[type=radio]:checked');
+            let allQuestionsAnswered = true;
+            const forms = parentElement.querySelectorAll('form[data-question-form]');
             let totalScore = 0;
-            inputs.forEach((input) => {
-                const value = parseInt((input as HTMLInputElement).value) || 0;
-                totalScore += value;
+
+            forms.forEach((form) => {
+                const checkedInput = form.querySelector('input[type=radio]:checked');
+                if (!checkedInput) {
+                    allQuestionsAnswered = false;
+                } else {
+                    const value = parseInt((checkedInput as HTMLInputElement).value) || 0;
+                    totalScore += value;
+                }
             });
-            alert(`リスクポイントの合計: ${totalScore}`);
+
+            if (!allQuestionsAnswered && this.debugMode != true) {
+                alert("全ての質問に回答してください。");
+            } else {
+                alert(`リスクポイントの合計: ${totalScore}`);
+            }
         };
 
         button.addEventListener("click", calculateScore);

@@ -22,7 +22,7 @@ function rendering(records: RecordData) {
     }
 
     // @ts-ignore
-    const renderer = new RecordHtmlRenderer(records);
+    const renderer = new RecordHtmlRenderer(records, DEBUGMODE);
     renderer.renderCategoryQuestions(parentElement);
     // document.querySelector<HTMLDivElement>('#app')!.innerHTML += htmlContent;
   } catch (error) {
