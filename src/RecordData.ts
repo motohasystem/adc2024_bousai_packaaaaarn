@@ -123,14 +123,25 @@ export class RecordData {
     // record_number: string | undefined = undefined のときは全ての影響テーブルを取得
     getImpactTable(record_number: string | undefined = undefined): Impact[][] {
 
+
         return this.items.reduce((table: Impact[][], item) => {
+            console.log({ item: item.レコード番号.S, record_number });
+            if (record_number !== undefined && item.レコード番号.S !== record_number) {
+                console.log('一致してない')
+                return table;
+            }
+            console.log('一致してる')
+
             const subtable = item.影響する設問テーブル.L.reduce((acc: Impact[], impact) => {
                 // 設問のレコード番号
-                const target = impact.M.value.M.設問のレコード番号.M.value as SValue;
-                if (record_number === undefined || target.S == record_number) {
-                    console.log({ record_number, tareget: target.S });
-                    acc.push(this.composeImpact(impact));
-                }
+                // const target = impact.M.value.M.設問のレコード番号.M.value as SValue;
+                // if (record_number === undefined) {
+                //     acc.push(this.composeImpact(impact));
+                // }
+                // else if (target.S == record_number) {
+                //     console.log({ record_number, tareget: target.S });
+                // }
+                acc.push(this.composeImpact(impact));
                 return acc;
             }, []);
 

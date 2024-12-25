@@ -38,7 +38,7 @@ class RecordHtmlRenderer {
 
                 // 係数を算出する
                 const efficient = ((rp: number, cond: string, exp: number) => {
-                    let isMet = null;
+                    let isMet = false;
                     switch (cond) {
                         case ">":
                             isMet = rp > exp ? true : false;
@@ -46,17 +46,14 @@ class RecordHtmlRenderer {
                         case "<":
                             isMet = rp < exp ? true : false;
                             break;
-                        case ">=":
+                        case "≧":
                             isMet = rp >= exp ? true : false;
                             break;
-                        case "<=":
+                        case "≦":
                             isMet = rp <= exp ? true : false;
                             break;
-                        case "==":
+                        case "=":
                             isMet = rp == exp ? true : false;
-                            break;
-                        case "!=":
-                            isMet = rp != exp ? true : false;
                             break;
                     }
 
@@ -65,14 +62,17 @@ class RecordHtmlRenderer {
                 })(rp, impact.condition, impact.expect)
 
                 if (efficient == null) {
-                    return conds;
+                    return "";
                 }
 
                 return `${impact.target}*${impact.coefficient.toFixed(2)}`; // 係数は小数点以下2桁で表現する
-            }).join(" & ");
-            conds.push(`${rowString}`);
+            }).filter(formula => formula != "").join(", ");
+            if (rowString != "") {
+                conds.push(`${rowString}`);
+            }
             return conds;
-        }, []).join(" + ");
+        }, []).join(" / ");
+        console.log({ impactRatio })
         return impactRatio
     }
 

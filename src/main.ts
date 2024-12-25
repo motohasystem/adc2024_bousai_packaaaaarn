@@ -7,7 +7,9 @@ import apiSample from './resource/api_sample.json';
 
 
 // 定数定義
-let DEBUGMODE = false;
+let DEBUGMODE = false;  // デバッグモード
+let MOCKMODE = false;   // APIを呼び出さないモックモード
+
 const API_URL = 'https://f56gy9u3sa.execute-api.ap-northeast-1.amazonaws.com/dev/items'
 const API_KEY = import.meta.env.VITE_API_KEY || '';
 
@@ -35,10 +37,13 @@ const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.has('DEBUG')) {
   DEBUGMODE = true;
 }
+if (urlParams.has('MOCK')) {
+  MOCKMODE = true;
+}
 
 
 // let recordData: RecordData;
-if (DEBUGMODE) {
+if (MOCKMODE) {
   try {
     // @ts-ignore
     const recordData = new RecordData(apiSample);
@@ -51,7 +56,7 @@ if (DEBUGMODE) {
 
 }
 else {
-  console.log('DEBUGMODE: OFF');
+  console.log('MOCKMODE: OFF');
   // API_URLにGETリクエストを送信
   console.log(API_KEY)
   fetch(API_URL, {
