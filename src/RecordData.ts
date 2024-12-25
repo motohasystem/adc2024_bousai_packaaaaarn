@@ -41,6 +41,17 @@ interface TableItem {
     }>;
 }
 
+// 影響する設問テーブル
+export interface Impact {
+    id: string;
+    description: string;
+    coefficient: number;
+    condition: string;
+    expect: number | null;
+    target: string;
+
+};
+
 // レコードの型
 interface RecordItem {
     [key: string]: FieldType; // インデックスシグネチャを追加
@@ -109,14 +120,45 @@ export class RecordData {
     }
 
     // 影響する設問テーブルを扱いやすい形で取得するメソッド
-    getImpactTable(): { id: string; description: string; coefficient: number }[][] {
-        return this.items.map((item) => {
-            return item.影響する設問テーブル.L.map((impact) => ({
-                id: impact.M.id.S,
-                description: (impact.M.value.M.説明.M.value as SValue).S,
-                coefficient: parseFloat((impact.M.value.M.係数.M.value as SValue).S) || 0,
-            }));
-        });
+    // record_number: string | undefined = undefined のときは全ての影響テーブルを取得
+    getImpactTable(record_number: string | undefined = undefined): Impact[][] {
+
+        return this.items.reduce((table: Impact[][], item) => {
+            const subtable = item.影響する設問テーブル.L.reduce((acc: Impact[], impact) => {
+                // 設問のレコード番号
+                const target = impact.M.value.M.設問のレコード番号.M.value as SValue;
+                if (record_number === undefined || target.S == record_number) {
+                    console.log({ record_number, tareget: target.S });
+                    acc.push(this.composeImpact(impact));
+                }
+                return acc;
+            }, []);
+
+            if (subtable.length > 0) {
+                table.push(subtable);
+            }
+
+            return table;
+        }, [])
+    }
+
+    // 影響する設問テーブルの項目を扱いやすい形に変換するメソッド
+    composeImpact(impact: MValue<TableItem>): Impact {
+
+        console.log({ impact });
+        const cond = impact.M.value.M.条件.M.value as SValue;   // 条件式
+        const target_question = impact.M.value.M.設問のレコード番号.M.value as SValue; // 対象設問番号
+        const expect = impact.M.value.M.条件の値.M.value as SValue; // 評価値
+
+        return {
+            id: impact.M.id.S,
+            target: target_question.S,
+            description: (impact.M.value.M.説明.M.value as SValue).S,
+            coefficient: parseFloat((impact.M.value.M.係数.M.value as SValue).S) || 0,
+            condition: cond.S ? cond.S : "",
+            expect: expect.S ? parseInt(expect.S) : null
+        };
+
     }
 
     // 任意のキー名で値を直接取得するメソッド

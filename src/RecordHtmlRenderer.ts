@@ -1,4 +1,4 @@
-import { RecordData, SValue } from "./RecordData";
+import { Impact, RecordData, SValue } from "./RecordData";
 
 class RecordHtmlRenderer {
     private recordData: RecordData;
@@ -19,6 +19,61 @@ class RecordHtmlRenderer {
             "お金": "category-5",
         };
         return categoryClasses[category] || "category-default";
+    }
+
+    // 影響係数の式を文字列として構築する
+    composeImpactRatioString(riskPoint: string, impactTable: Impact[][]): string {
+        console.log({ impactTable });
+        const rp = parseInt(riskPoint) || null
+
+        const impactRatio = impactTable.reduce((conds: string[], row) => {
+            if (rp == null) {
+                return conds;
+            }
+
+            const rowString = row.map((impact) => {
+                if (impact.expect == null) {
+                    return ""
+                }
+
+                // 係数を算出する
+                const efficient = ((rp: number, cond: string, exp: number) => {
+                    let isMet = null;
+                    switch (cond) {
+                        case ">":
+                            isMet = rp > exp ? true : false;
+                            break;
+                        case "<":
+                            isMet = rp < exp ? true : false;
+                            break;
+                        case ">=":
+                            isMet = rp >= exp ? true : false;
+                            break;
+                        case "<=":
+                            isMet = rp <= exp ? true : false;
+                            break;
+                        case "==":
+                            isMet = rp == exp ? true : false;
+                            break;
+                        case "!=":
+                            isMet = rp != exp ? true : false;
+                            break;
+                    }
+
+                    return isMet ? impact.coefficient : null;
+
+                })(rp, impact.condition, impact.expect)
+
+                if (efficient == null) {
+                    return conds;
+                }
+
+                return `${impact.target}*${impact.coefficient.toFixed(2)}`; // 係数は小数点以下2桁で表現する
+            }).join(" & ");
+            conds.push(`${rowString}`);
+            return conds;
+        }, []).join(" + ");
+        return impactRatio
     }
 
     // カテゴリ別の質問一覧をDOMとして出力
@@ -53,16 +108,24 @@ class RecordHtmlRenderer {
 
                 item.選択肢テーブル.L.forEach((choice) => {
                     // const choiceId = (choice.M.id as SValue).S;
-                    const choiceText = (choice.M.value.M.回答項目.M.value as SValue).S;
+                    const record_number = item.レコード番号.S
+                    let choiceText = (choice.M.value.M.回答項目.M.value as SValue).S;
                     const choiceValue = (choice.M.value.M.リスクポイント.M.value as SValue).S;
 
                     const label = document.createElement("label");
                     const input = document.createElement("input");
                     input.type = "radio";
-                    input.name = `question_${item.レコード番号.S}`;
-                    input.value = choiceValue;
+                    input.name = `question_${record_number}`;
+                    input.value = choiceValue
+
+                    const impactTable = this.recordData.getImpactTable(record_number);
+                    const impactRatio = this.composeImpactRatioString(choiceValue, impactTable); // 他の回答に与える係数
+                    input.setAttribute("data-effect-ratio", impactRatio);
 
                     label.appendChild(input);
+                    if (this.debugMode) {
+                        choiceText += ` (${impactRatio})`
+                    }
                     label.appendChild(document.createTextNode(choiceText));
                     form.appendChild(label);
 
@@ -146,6 +209,7 @@ class RecordHtmlRenderer {
                 if (!checkedInput) {
                     allQuestionsAnswered = false;
                 } else {
+                    // スコアの計算を行う
                     const value = parseInt((checkedInput as HTMLInputElement).value) || 0;
                     totalScore += value;
                 }

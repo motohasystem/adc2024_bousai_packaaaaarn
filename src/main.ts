@@ -7,7 +7,7 @@ import apiSample from './resource/api_sample.json';
 
 
 // 定数定義
-const DEBUGMODE = false;
+let DEBUGMODE = false;
 const API_URL = 'https://f56gy9u3sa.execute-api.ap-northeast-1.amazonaws.com/dev/items'
 const API_KEY = import.meta.env.VITE_API_KEY || '';
 
@@ -28,6 +28,12 @@ function rendering(records: RecordData) {
   } catch (error) {
     console.error('Error rendering HTML:', error);
   }
+}
+
+// GETパラメータにDEBUG=trueがあるときはデバッグモード
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.has('DEBUG')) {
+  DEBUGMODE = true;
 }
 
 
@@ -67,25 +73,3 @@ else {
       console.error('Error loading JSON:', error);
     });
 }
-
-
-
-// document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-//   <div>
-//     <a href="https://vite.dev" target="_blank">
-//       <img src="${viteLogo}" class="logo" alt="Vite logo" />
-//     </a>
-//     <a href="https://www.typescriptlang.org/" target="_blank">
-//       <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-//     </a>
-//     <h1>Vite + TypeScript</h1>
-//     <div class="card">
-//       <button id="counter" type="button"></button>
-//     </div>
-//     <p class="read-the-docs">
-//       Click on the Vite and TypeScript logos to learn more
-//     </p>
-//   </div>
-// `
-
-// setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
