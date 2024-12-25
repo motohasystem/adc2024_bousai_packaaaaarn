@@ -124,7 +124,7 @@ class RecordHtmlRenderer {
 
                     label.appendChild(input);
                     if (this.debugMode) {
-                        choiceText += ` (${impactRatio})`
+                        choiceText += ` (Num: ${record_number} / RP: ${choiceValue} / Effect: ${impactRatio ? impactRatio : "none"})`;
                     }
                     label.appendChild(document.createTextNode(choiceText));
                     form.appendChild(label);
@@ -204,16 +204,58 @@ class RecordHtmlRenderer {
             const forms = parentElement.querySelectorAll('form[data-question-form]');
             let totalScore = 0;
 
+            const effectRatios: string[] = [];
+            const answers: {
+                [key: string]: {
+                    value: number,
+                    effectRatio: string[]
+                }
+            } = {}
             forms.forEach((form) => {
                 const checkedInput = form.querySelector('input[type=radio]:checked');
                 if (!checkedInput) {
                     allQuestionsAnswered = false;
                 } else {
+                    const record_number = (checkedInput as HTMLInputElement).name.split("_")[1];
+                    console.log(`設問レコード番号: ${record_number}`);
                     // スコアの計算を行う
                     const value = parseInt((checkedInput as HTMLInputElement).value) || 0;
-                    totalScore += value;
+                    answers[record_number] = {
+                        value: value,
+                        effectRatio: []
+                    }
+
+                    // 影響係数を取得
+                    const effectRatio = (checkedInput as HTMLInputElement).getAttribute("data-effect-ratio");
+                    if (effectRatio) {
+                        console.log(`選択肢の影響係数: ${effectRatio}`);
+                        effectRatios.push(effectRatio);
+                    }
                 }
             });
+
+            // 影響係数を割り当てる
+            effectRatios.forEach((ratio) => {
+                const ratioItems = ratio.split(", ");
+                ratioItems.forEach((item) => {
+                    const [target, coefficient] = item.split("*");
+                    if (answers[target]) {
+                        answers[target].effectRatio.push(coefficient)
+                    }
+                    else {
+                        console.error(`対象が見つかりません: ${target}`);
+                    }
+                });
+            });
+
+            // 割り当てられた影響係数を計算する
+            for (const [_key, value] of Object.entries(answers)) {
+                let score = value.value;
+                value.effectRatio.forEach((ratio) => {
+                    score = score * parseFloat(ratio);
+                });
+                totalScore += score;
+            }
 
             if (!allQuestionsAnswered && this.debugMode != true) {
                 alert("全ての質問に回答してください。");
