@@ -1,4 +1,13 @@
 import { Impact, RecordData, SValue } from "./RecordData";
+import { ScoreCalculator } from "./ScoreCalculator";
+
+export type CategoryScore = {
+    sum: number;
+    count: number;
+    max_question: number;
+    min_question: number;
+};
+
 
 class RecordHtmlRenderer {
     private recordData: RecordData;
@@ -117,6 +126,7 @@ class RecordHtmlRenderer {
                     input.type = "radio";
                     input.name = `question_${record_number}`;
                     input.value = choiceValue
+                    input.setAttribute('category', category);
 
                     const impactTable = this.recordData.getImpactTable(record_number);
                     const impactRatio = this.composeImpactRatioString(choiceValue, impactTable); // 他の回答に与える係数
@@ -204,11 +214,17 @@ class RecordHtmlRenderer {
             const forms = parentElement.querySelectorAll('form[data-question-form]');
             let totalScore = 0;
 
+            // let categoryScores: { [key: string]: CategoryScore } = {};    // カテゴリ別のスコア
+            // スコアの合計を表示
+            const calculator = new ScoreCalculator('messages.json');
+
+
             const effectRatios: string[] = [];
             const answers: {
                 [key: string]: {
                     value: number,
-                    effectRatio: string[]
+                    effectRatio: string[],
+                    category: string
                 }
             } = {}
             forms.forEach((form) => {
@@ -222,7 +238,8 @@ class RecordHtmlRenderer {
                     const value = parseInt((checkedInput as HTMLInputElement).value) || 0;
                     answers[record_number] = {
                         value: value,
-                        effectRatio: []
+                        effectRatio: [],
+                        category: checkedInput.getAttribute('category') || ""
                     }
 
                     // 影響係数を取得
@@ -243,7 +260,7 @@ class RecordHtmlRenderer {
                         answers[target].effectRatio.push(coefficient)
                     }
                     else {
-                        console.error(`対象が見つかりません: ${target}`);
+                        console.warn(`対象が見つかりません: ${target}`);
                     }
                 });
             });
@@ -255,12 +272,68 @@ class RecordHtmlRenderer {
                     score = score * parseFloat(ratio);
                 });
                 totalScore += score;
+
+                // カテゴリ別の集計
+                const category = value.category;
+                const questionNumber = parseInt(_key);
+                calculator.addEntry(category, score, questionNumber);
             }
 
             if (!allQuestionsAnswered && this.debugMode != true) {
                 alert("全ての質問に回答してください。");
             } else {
-                alert(`リスクポイントの合計: ${totalScore}`);
+                const maxCategory = calculator.getMaxScoreCategory();
+                const maxScore = calculator.getCategoryTotalScore(maxCategory);
+                const minCategory = calculator.getMinScoreCategory();
+                const minScore = calculator.getCategoryTotalScore(minCategory);
+
+                console.log(`最大合計カテゴリ: ${maxCategory} - 合計: ${maxScore}`);
+                console.log(`最小合計カテゴリ: ${minCategory} - 合計: ${minScore}`);
+
+                // スコアが最大となるカテゴリと最小となるカテゴリのメッセージを取得し、両方のメッセージが出揃った段階でダイアログを表示する
+                Promise.all([
+                    calculator.getHighRiskMessage(maxCategory),
+                    calculator.getLowRiskMessage(minCategory)
+                ]).then(([highRiskMessage, lowRiskMessage]) => {
+                    console.log(`High riskメッセージ: ${highRiskMessage}`);
+                    console.log(`Low riskメッセージ: ${lowRiskMessage}`);
+                    // alert(`High riskメッセージ: ${highRiskMessage}\nLow riskメッセージ: ${lowRiskMessage}`);
+
+                    // high risk / low riskメッセージを、いい感じのダイアログで表示する
+                    const dialog = document.createElement('dialog');
+                    dialog.style.padding = '20px';
+                    dialog.style.borderRadius = '8px';
+                    dialog.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+                    dialog.style.maxWidth = '400px';
+                    dialog.style.margin = 'auto';
+                    dialog.style.textAlign = 'center';
+
+                    const highRiskParagraph = document.createElement('p');
+                    highRiskParagraph.textContent = `リスクが高い: ${highRiskMessage}`;
+                    highRiskParagraph.style.color = 'red';
+                    highRiskParagraph.style.fontWeight = 'bold';
+
+                    const lowRiskParagraph = document.createElement('p');
+                    lowRiskParagraph.textContent = `リスクが低い: ${lowRiskMessage}`;
+                    lowRiskParagraph.style.color = 'green';
+                    lowRiskParagraph.style.fontWeight = 'bold';
+
+                    const closeButton = document.createElement('button');
+                    closeButton.textContent = '閉じる';
+                    closeButton.style.marginTop = '20px';
+                    closeButton.onclick = () => dialog.close();
+
+                    dialog.appendChild(highRiskParagraph);
+                    dialog.appendChild(lowRiskParagraph);
+                    dialog.appendChild(closeButton);
+
+                    document.body.appendChild(dialog);
+                    dialog.showModal();
+
+
+                });
+
+                // alert(`リスクポイントの合計: ${totalScore}`);
             }
         };
 
