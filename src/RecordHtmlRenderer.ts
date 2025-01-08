@@ -297,7 +297,40 @@ class RecordHtmlRenderer {
                 ]).then(([highRiskMessage, lowRiskMessage]) => {
                     console.log(`High riskメッセージ: ${highRiskMessage}`);
                     console.log(`Low riskメッセージ: ${lowRiskMessage}`);
-                    alert(`High riskメッセージ: ${highRiskMessage}\nLow riskメッセージ: ${lowRiskMessage}`);
+                    // alert(`High riskメッセージ: ${highRiskMessage}\nLow riskメッセージ: ${lowRiskMessage}`);
+
+                    // high risk / low riskメッセージを、いい感じのダイアログで表示する
+                    const dialog = document.createElement('dialog');
+                    dialog.style.padding = '20px';
+                    dialog.style.borderRadius = '8px';
+                    dialog.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+                    dialog.style.maxWidth = '400px';
+                    dialog.style.margin = 'auto';
+                    dialog.style.textAlign = 'center';
+
+                    const highRiskParagraph = document.createElement('p');
+                    highRiskParagraph.textContent = `リスクが高い: ${highRiskMessage}`;
+                    highRiskParagraph.style.color = 'red';
+                    highRiskParagraph.style.fontWeight = 'bold';
+
+                    const lowRiskParagraph = document.createElement('p');
+                    lowRiskParagraph.textContent = `リスクが低い: ${lowRiskMessage}`;
+                    lowRiskParagraph.style.color = 'green';
+                    lowRiskParagraph.style.fontWeight = 'bold';
+
+                    const closeButton = document.createElement('button');
+                    closeButton.textContent = '閉じる';
+                    closeButton.style.marginTop = '20px';
+                    closeButton.onclick = () => dialog.close();
+
+                    dialog.appendChild(highRiskParagraph);
+                    dialog.appendChild(lowRiskParagraph);
+                    dialog.appendChild(closeButton);
+
+                    document.body.appendChild(dialog);
+                    dialog.showModal();
+
+
                 });
 
                 // alert(`リスクポイントの合計: ${totalScore}`);
