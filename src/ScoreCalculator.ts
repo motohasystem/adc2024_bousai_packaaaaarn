@@ -88,8 +88,9 @@ export class ScoreCalculator {
 
 
     // ResultMessageRetrieverを使用して、カテゴリ別の最大スコアを持つ質問のメッセージを取得
-    async getHighRiskMessage(category: string): Promise<string> {
-        const questionNumber = this.getCategoryMaxScoreQuestion(category);
+    // withBrTagがtrueの場合、改行を改行タグ<BR/>に変換する
+    private async getRiskMessage(category: string, isHighRisk: boolean, withBrTag = false): Promise<string> {
+        const questionNumber = isHighRisk ? this.getCategoryMaxScoreQuestion(category) : this.getCategoryMinScoreQuestion(category);
         if (!questionNumber) {
             return '質問が見つかりませんでした';
         }
@@ -97,22 +98,18 @@ export class ScoreCalculator {
         const retriever = new ResultMessageRetriever(this.jsonUrl, category, questionNumber.toString());
         return await retriever.build().then((result) => {
             const parsed = JSON.parse(result);
-            return parsed['high_risk'];
-        })
+            return isHighRisk ? parsed['high_risk'] : parsed['low_risk'];
+        }).then((message) => {
+            return withBrTag ? message.replace(/\n/g, '<br>') : message;
+        });
     }
 
-    // ResultMessageRetrieverを使用して、カテゴリ別の最小スコアを持つ質問のメッセージを取得
-    async getLowRiskMessage(category: string): Promise<string> {
-        const questionNumber = this.getCategoryMinScoreQuestion(category);
-        if (!questionNumber) {
-            return '質問が見つかりませんでした';
-        }
+    async getHighRiskMessage(category: string, withBrTag = false): Promise<string> {
+        return this.getRiskMessage(category, true, withBrTag);
+    }
 
-        const retriever = new ResultMessageRetriever(this.jsonUrl, category, questionNumber.toString());
-        return await retriever.build().then((result) => {
-            const parsed = JSON.parse(result);
-            return parsed['low_risk'];
-        })
+    async getLowRiskMessage(category: string, withBrTag = false): Promise<string> {
+        return this.getRiskMessage(category, false, withBrTag);
     }
 
 }
