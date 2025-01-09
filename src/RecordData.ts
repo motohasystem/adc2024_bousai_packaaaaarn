@@ -59,6 +59,7 @@ interface RecordItem {
     更新日時: SValue;
     備考: SValue;
     カテゴリ: SValue;
+    カテゴリ内の表示順序: SValue;
     更新者: MValue<CreatorUpdater>;
     作成日時: SValue;
     レコード番号: SValue;
@@ -202,6 +203,10 @@ export class RecordData {
             }
 
             return item.カテゴリ?.S === category
+        }).sort((a, b) => {
+            const orderA = parseInt(a.カテゴリ内の表示順序.S, 10);
+            const orderB = parseInt(b.カテゴリ内の表示順序.S, 10);
+            return orderA - orderB;
         });
     }
 }

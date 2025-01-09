@@ -108,7 +108,11 @@ class RecordHtmlRenderer {
                 questionDiv.style.transition = "all 0.5s ease";
 
                 const questionText = document.createElement("p");
+
                 questionText.textContent = `質問 ${index + 1}: ${item.質問文.S}`;
+                if (this.debugMode) {
+                    questionText.textContent += `(表示順序: ${item.カテゴリ内の表示順序.S})`;
+                }
                 questionDiv.appendChild(questionText);
 
                 const form = document.createElement("form");
