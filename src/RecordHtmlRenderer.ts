@@ -292,8 +292,8 @@ class RecordHtmlRenderer {
 
                 // スコアが最大となるカテゴリと最小となるカテゴリのメッセージを取得し、両方のメッセージが出揃った段階でダイアログを表示する
                 Promise.all([
-                    calculator.getHighRiskMessage(maxCategory),
-                    calculator.getLowRiskMessage(minCategory)
+                    calculator.getHighRiskMessage(maxCategory, true),
+                    calculator.getLowRiskMessage(minCategory, true)
                 ]).then(([highRiskMessage, lowRiskMessage]) => {
                     console.log(`High riskメッセージ: ${highRiskMessage}`);
                     console.log(`Low riskメッセージ: ${lowRiskMessage}`);
@@ -304,25 +304,56 @@ class RecordHtmlRenderer {
                     dialog.style.padding = '20px';
                     dialog.style.borderRadius = '8px';
                     dialog.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
-                    dialog.style.maxWidth = '400px';
+                    dialog.style.maxWidth = '600px';
                     dialog.style.margin = 'auto';
-                    dialog.style.textAlign = 'center';
+                    dialog.style.textAlign = 'left';
+                    dialog.style.fontSize = '14px';
 
+                    // トータルスコア
+                    const scoreParagraph = document.createElement('p');
+                    const headline = document.createElement('h2');
+                    headline.textContent = 'あなたの生活困窮リスクポイント';
+                    headline.style.textAlign = 'center';
+                    headline.style.marginBottom = '4px';
+                    dialog.appendChild(headline);
+
+                    scoreParagraph.innerHTML = `${totalScore} RP`;
+                    scoreParagraph.style.fontWeight = 'bold';
+                    scoreParagraph.style.textAlign = 'center';
+                    scoreParagraph.style.fontSize = '20px';
+                    scoreParagraph.style.marginBottom = '4px';
+
+
+                    // ハイリスク
                     const highRiskParagraph = document.createElement('p');
-                    highRiskParagraph.textContent = `リスクが高い: ${highRiskMessage}`;
+                    highRiskParagraph.innerHTML = `<h3>高リスク:</h3>${highRiskMessage}`;
                     highRiskParagraph.style.color = 'red';
-                    highRiskParagraph.style.fontWeight = 'bold';
+                    // highRiskParagraph.style.fontWeight = 'bold';
 
+                    // ローリスク
                     const lowRiskParagraph = document.createElement('p');
-                    lowRiskParagraph.textContent = `リスクが低い: ${lowRiskMessage}`;
+                    lowRiskParagraph.innerHTML = `<h3>低リスク:</h3>${lowRiskMessage}`;
                     lowRiskParagraph.style.color = 'green';
-                    lowRiskParagraph.style.fontWeight = 'bold';
+                    // lowRiskParagraph.style.fontWeight = 'bold';
 
                     const closeButton = document.createElement('button');
                     closeButton.textContent = '閉じる';
                     closeButton.style.marginTop = '20px';
+                    closeButton.style.padding = '10px 20px';
+                    closeButton.style.backgroundColor = '#007BFF';
+                    closeButton.style.color = '#FFFFFF';
+                    closeButton.style.border = 'none';
+                    closeButton.style.borderRadius = '5px';
+                    closeButton.style.cursor = 'pointer';
+                    closeButton.style.transition = 'background-color 0.3s ease';
+                    closeButton.style.display = 'block';
+                    closeButton.style.marginLeft = 'auto';
+                    closeButton.style.marginRight = 'auto';
+                    closeButton.onmouseover = () => closeButton.style.backgroundColor = '#0056b3';
+                    closeButton.onmouseout = () => closeButton.style.backgroundColor = '#007BFF';
                     closeButton.onclick = () => dialog.close();
 
+                    dialog.appendChild(scoreParagraph);
                     dialog.appendChild(highRiskParagraph);
                     dialog.appendChild(lowRiskParagraph);
                     dialog.appendChild(closeButton);
@@ -330,7 +361,7 @@ class RecordHtmlRenderer {
                     document.body.appendChild(dialog);
                     dialog.showModal();
 
-
+                    dialog.scrollTop = 0;
                 });
 
                 // alert(`リスクポイントの合計: ${totalScore}`);
