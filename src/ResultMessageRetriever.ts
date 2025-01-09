@@ -39,6 +39,7 @@ export class ResultMessageRetriever {
         await this.loadRecords();
         const record = this.records?.[this.category]?.[this.questionNumber]?.messages;
         if (!record) {
+            console.error(`回答が見つかりませんでした: ${this.questionNumber}`)
             return '回答が見つかりませんでした';
         }
         return JSON.stringify(record);
