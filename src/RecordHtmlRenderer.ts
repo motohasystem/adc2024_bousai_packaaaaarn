@@ -32,7 +32,7 @@ class RecordHtmlRenderer {
 
     // 影響係数の式を文字列として構築する
     composeImpactRatioString(riskPoint: string, impactTable: Impact[][]): string {
-        console.log({ impactTable });
+        // console.log({ impactTable });
         const rp = parseInt(riskPoint) || null
 
         const impactRatio = impactTable.reduce((conds: string[], row) => {
@@ -81,7 +81,7 @@ class RecordHtmlRenderer {
             }
             return conds;
         }, []).join(" / ");
-        console.log({ impactRatio })
+        // console.log({ impactRatio })
         return impactRatio
     }
 
