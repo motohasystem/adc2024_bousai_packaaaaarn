@@ -32,7 +32,7 @@ class RecordHtmlRenderer {
 
     // 影響係数の式を文字列として構築する
     composeImpactRatioString(riskPoint: string, impactTable: Impact[][]): string {
-        console.log({ impactTable });
+        // console.log({ impactTable });
         const rp = parseInt(riskPoint) || null
 
         const impactRatio = impactTable.reduce((conds: string[], row) => {
@@ -81,7 +81,7 @@ class RecordHtmlRenderer {
             }
             return conds;
         }, []).join(" / ");
-        console.log({ impactRatio })
+        // console.log({ impactRatio })
         return impactRatio
     }
 
@@ -108,7 +108,11 @@ class RecordHtmlRenderer {
                 questionDiv.style.transition = "all 0.5s ease";
 
                 const questionText = document.createElement("p");
+
                 questionText.textContent = `質問 ${index + 1}: ${item.質問文.S}`;
+                if (this.debugMode) {
+                    questionText.textContent += `(表示順序: ${item.カテゴリ内の表示順序.S})`;
+                }
                 questionDiv.appendChild(questionText);
 
                 const form = document.createElement("form");
