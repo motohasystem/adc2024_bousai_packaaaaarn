@@ -96,9 +96,8 @@ export class ScoreCalculator {
         }
 
         const retriever = new ResultMessageRetriever(this.jsonUrl, category, questionNumber.toString());
-        return await retriever.build().then((result) => {
-            const parsed = JSON.parse(result);
-            return isHighRisk ? parsed['high_risk'] : parsed['low_risk'];
+        return await retriever.build().then((msg_highlow) => {
+            return isHighRisk ? msg_highlow['high_risk'] : msg_highlow['low_risk'];
         }).then((message) => {
             return withBrTag ? message.replace(/\n/g, '<br>') : message;
         });
