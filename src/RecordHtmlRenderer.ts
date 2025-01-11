@@ -357,9 +357,28 @@ class RecordHtmlRenderer {
                     closeButton.onmouseout = () => closeButton.style.backgroundColor = '#007BFF';
                     closeButton.onclick = () => dialog.close();
 
+                    // 表示する画像を取得する
+                    const highRiskImage = calculator.getCategoryImageName(maxCategory);
+                    const lowRiskImage = calculator.getCategoryImageName(minCategory);
+
+                    console.log(`High risk image: ${highRiskImage}`);
+                    console.log(`Low risk image: ${lowRiskImage}`);
+
+                    // url形式にする
+                    const highRiskImageUrl = `/img/${highRiskImage}`
+                    const lowRiskImageUrl = `/img/${lowRiskImage}`
+
+                    const highRiskResult = this.createImageWithCaption(highRiskImageUrl, highRiskMessage, "高リスク", "#990000");
+                    const lowRiskResult = this.createImageWithCaption(lowRiskImageUrl, lowRiskMessage, "低リスク", "#009900");
+
                     dialog.appendChild(scoreParagraph);
-                    dialog.appendChild(highRiskParagraph);
-                    dialog.appendChild(lowRiskParagraph);
+
+                    dialog.appendChild(highRiskResult);
+                    // dialog.appendChild(highRiskParagraph);
+
+
+                    dialog.appendChild(lowRiskResult);
+                    // dialog.appendChild(lowRiskParagraph);
                     dialog.appendChild(closeButton);
 
                     document.body.appendChild(dialog);
@@ -373,6 +392,40 @@ class RecordHtmlRenderer {
         };
 
         button.addEventListener("click", calculateScore);
+    }
+
+    // img要素とp要素を受け取り、画像の上にP要素を重ねた要素を作成して返す
+    private createImageWithCaption(imageUrl: string, caption: string, label: string, color: string): HTMLDivElement {
+        const lowRiskParagraph = document.createElement('p');
+        lowRiskParagraph.innerHTML = `<h3>${label}:</h3>${caption}`;
+        lowRiskParagraph.style.color = color;
+        lowRiskParagraph.style.zIndex = "1";
+        // lowRiskParagraph.style.position = "absolute";
+        // lowRiskParagraph.style.top = "50%";
+        // lowRiskParagraph.style.left = "50%";
+        // lowRiskParagraph.style.transform = "translate(-50%, -50%)";
+        lowRiskParagraph.style.margin = "0";
+        lowRiskParagraph.style.width = "100%"; // 画像と同じ横幅に設定
+        // lowRiskParagraph.style.fontSize = "large";
+        lowRiskParagraph.style.fontWeight = "bold";
+
+        const container = document.createElement("div");
+        // container.style.display = "flex";
+        container.style.justifyContent = "center";
+        container.style.alignItems = "center";
+        // container.style.position = "relative";
+
+        const image = document.createElement("img");
+        image.src = imageUrl;
+        image.style.width = "100%";
+        image.style.height = "auto";
+        image.style.zIndex = "0";
+        // image.style.opacity = "0.4";
+
+        container.appendChild(image);
+        container.appendChild(lowRiskParagraph);
+
+        return container;
     }
 }
 

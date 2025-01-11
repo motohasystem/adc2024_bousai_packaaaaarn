@@ -1,8 +1,7 @@
 import { ResultMessageRetriever } from "./ResultMessageRetriever";
 
 export class CategoriesImageStore {
-    static readonly averageThreshold = 2.65;
-    static readonly categoryAverage = {
+    static readonly categoryAverage: { [key: string]: number } = {
         "家屋": 29.15,
         "情報": 13.25,
         "コミュニティ": 15.90,
@@ -35,6 +34,12 @@ export class CategoriesImageStore {
             high: 'other_high.webp',
             low: 'other_low.webp'
         }
+    }
+
+    // カテゴリ名とスコアを受け取り、そのスコアが平均値以上かどうかを判定してファイル名を返す
+    static getImageName(category: string, score: number): string {
+        const threshold = CategoriesImageStore.categoryAverage[category];
+        return score >= threshold ? CategoriesImageStore.images[category].high : CategoriesImageStore.images[category].low;
     }
 }
 
@@ -112,6 +117,20 @@ export class ScoreCalculator {
             return false;
         }
         return average >= threshold;
+    }
+
+    // カテゴリ名を指定して、スコア平均値を取得し、平均値をつかってファイル名を取得します。
+    getCategoryImageName(category: string): string {
+        const average = this.getCategoryAverageScore(category);
+        if (average === null) {
+            return '';
+        }
+
+        const score = this.getCategoryTotalScore(category);
+        if (score === null) {
+            return '';
+        }
+        return CategoriesImageStore.getImageName(category, score);
     }
 
 
