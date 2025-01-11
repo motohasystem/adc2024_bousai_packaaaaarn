@@ -1,5 +1,43 @@
 import { ResultMessageRetriever } from "./ResultMessageRetriever";
 
+export class CategoriesImageStore {
+    static readonly averageThreshold = 2.65;
+    static readonly categoryAverage = {
+        "家屋": 29.15,
+        "情報": 13.25,
+        "コミュニティ": 15.90,
+        "お金": 7.95,
+        "家族": 21.20,
+        "その他": 5.30
+    }
+    static readonly images: { [key: string]: { high: string; low: string } } = {
+        '家屋': {
+            high: 'residence_high.webp',
+            low: 'residence_low.webp'
+        },
+        '情報': {
+            high: 'information_high.webp',
+            low: 'information_low.webp'
+        },
+        'コミュニティ': {
+            high: 'community_high.webp',
+            low: 'community_low.webp'
+        },
+        'お金': {
+            high: 'money_high.webp',
+            low: 'money_low.webp'
+        },
+        '家族': {
+            high: 'family_high.webp',
+            low: 'family_low.webp'
+        },
+        'その他': {
+            high: 'other_high.webp',
+            low: 'other_low.webp'
+        }
+    }
+}
+
 export class ScoreCalculator {
     private jsonUrl: string;
     private categories: Record<string, CategoryData>;
@@ -58,6 +96,24 @@ export class ScoreCalculator {
         }
         return this.categories[category].totalScore;
     }
+
+    // カテゴリ別のスコアの平均値を取得
+    getCategoryAverageScore(category: string): number | null {
+        if (!this.categories[category] || this.categories[category].entries.length === 0) {
+            return null;
+        }
+        return this.categories[category].totalScore / this.categories[category].entries.length;
+    }
+
+    // 指定したカテゴリのスコアの平均値が、指定した値以上かどうかを判定
+    isCategoryAverageScoreAbove(category: string, threshold: number): boolean {
+        const average = this.getCategoryAverageScore(category);
+        if (average === null) {
+            return false;
+        }
+        return average >= threshold;
+    }
+
 
     // カテゴリ別の最大スコアを持つ質問番号を取得
     getCategoryMaxScoreQuestion(category: string): number | null {
