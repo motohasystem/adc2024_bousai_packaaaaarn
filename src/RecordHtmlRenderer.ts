@@ -374,7 +374,7 @@ class RecordHtmlRenderer {
     // img要素とp要素を受け取り、画像の上にP要素を重ねた要素を作成して返す
     private createImageWithCaption(imageFilename: string, caption: string, label: string, color: string): HTMLDivElement {
         // url形式にする
-        const imageUrl = `/img/${imageFilename}`
+        const imageUrl = `./img/${imageFilename}`
 
         const lowRiskParagraph = document.createElement('p');
         lowRiskParagraph.innerHTML = `<h3>${label}:</h3>${caption}`;
