@@ -1,5 +1,7 @@
 // カテゴリ名と質問番号を受け取り、そのカテゴリの質問に対する回答をJSONから探索して返す
 
+export type HighLowMessage = { high_risk: string; low_risk: string };
+
 export class ResultMessageRetriever {
     private jsonFileUrl: string;
     private records: Record<string, Record<string, { messages: { high_risk: string; low_risk: string } }>> | null = null;
@@ -35,14 +37,21 @@ export class ResultMessageRetriever {
         }
     }
 
-    public async build(): Promise<string> {
+    public async build(): Promise<HighLowMessage> {
         await this.loadRecords();
         const record = this.records?.[this.category]?.[this.questionNumber]?.messages;
         if (!record) {
             console.error(`回答が見つかりませんでした: ${this.questionNumber}`)
-            return '回答が見つかりませんでした';
+            const notfoundmsg = (pattern: string, index = "") => {
+                return `メッセージデータのリビルドが必要です。設問${index}に対応する ${pattern} メッセージが見つかりませんでした`
+            }
+            return {
+                high_risk: notfoundmsg('High risk', this.questionNumber),
+                low_risk: notfoundmsg('Low risk', this.questionNumber),
+            };
         }
-        return JSON.stringify(record);
+        return record;
+        // return JSON.stringify(record);
     }
 
     public async getHighRiskMessage(): Promise<string> {

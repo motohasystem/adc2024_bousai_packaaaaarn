@@ -1,5 +1,48 @@
 import { ResultMessageRetriever } from "./ResultMessageRetriever";
 
+export class CategoriesImageStore {
+    static readonly categoryAverage: { [key: string]: number } = {
+        "家屋": 29.15,
+        "情報": 13.25,
+        "コミュニティ": 15.90,
+        "お金": 7.95,
+        "家族": 21.20,
+        "その他": 5.30
+    }
+    static readonly images: { [key: string]: { high: string; low: string } } = {
+        '家屋': {
+            high: 'residence_high.webp',
+            low: 'residence_low.webp'
+        },
+        '情報': {
+            high: 'information_high.webp',
+            low: 'information_low.webp'
+        },
+        'コミュニティ': {
+            high: 'community_high.webp',
+            low: 'community_low.webp'
+        },
+        'お金': {
+            high: 'money_high.webp',
+            low: 'money_low.webp'
+        },
+        '家族': {
+            high: 'family_high.webp',
+            low: 'family_low.webp'
+        },
+        'その他': {
+            high: 'other_high.webp',
+            low: 'other_low.webp'
+        }
+    }
+
+    // カテゴリ名とスコアを受け取り、そのスコアが平均値以上かどうかを判定してファイル名を返す
+    static getImageName(category: string, score: number): string {
+        const threshold = CategoriesImageStore.categoryAverage[category];
+        return score >= threshold ? CategoriesImageStore.images[category].high : CategoriesImageStore.images[category].low;
+    }
+}
+
 export class ScoreCalculator {
     private jsonUrl: string;
     private categories: Record<string, CategoryData>;
@@ -59,6 +102,38 @@ export class ScoreCalculator {
         return this.categories[category].totalScore;
     }
 
+    // カテゴリ別のスコアの平均値を取得
+    getCategoryAverageScore(category: string): number | null {
+        if (!this.categories[category] || this.categories[category].entries.length === 0) {
+            return null;
+        }
+        return this.categories[category].totalScore / this.categories[category].entries.length;
+    }
+
+    // 指定したカテゴリのスコアの平均値が、指定した値以上かどうかを判定
+    isCategoryAverageScoreAbove(category: string, threshold: number): boolean {
+        const average = this.getCategoryAverageScore(category);
+        if (average === null) {
+            return false;
+        }
+        return average >= threshold;
+    }
+
+    // カテゴリ名を指定して、スコア平均値を取得し、平均値をつかってファイル名を取得します。
+    getCategoryImageName(category: string): string {
+        const average = this.getCategoryAverageScore(category);
+        if (average === null) {
+            return '';
+        }
+
+        const score = this.getCategoryTotalScore(category);
+        if (score === null) {
+            return '';
+        }
+        return CategoriesImageStore.getImageName(category, score);
+    }
+
+
     // カテゴリ別の最大スコアを持つ質問番号を取得
     getCategoryMaxScoreQuestion(category: string): number | null {
         if (!this.categories[category] || this.categories[category].entries.length === 0) {
@@ -96,9 +171,8 @@ export class ScoreCalculator {
         }
 
         const retriever = new ResultMessageRetriever(this.jsonUrl, category, questionNumber.toString());
-        return await retriever.build().then((result) => {
-            const parsed = JSON.parse(result);
-            return isHighRisk ? parsed['high_risk'] : parsed['low_risk'];
+        return await retriever.build().then((msg_highlow) => {
+            return isHighRisk ? msg_highlow['high_risk'] : msg_highlow['low_risk'];
         }).then((message) => {
             return withBrTag ? message.replace(/\n/g, '<br>') : message;
         });

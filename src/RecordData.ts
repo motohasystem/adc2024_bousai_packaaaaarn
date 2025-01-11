@@ -204,8 +204,8 @@ export class RecordData {
 
             return item.カテゴリ?.S === category
         }).sort((a, b) => {
-            const orderA = parseInt(a.カテゴリ内の表示順序.S, 10);
-            const orderB = parseInt(b.カテゴリ内の表示順序.S, 10);
+            const orderA = parseInt(a.カテゴリ内の表示順序.S, 10) || Infinity;
+            const orderB = parseInt(b.カテゴリ内の表示順序.S, 10) || Infinity;
             return orderA - orderB;
         });
     }
