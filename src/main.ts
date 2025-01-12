@@ -32,6 +32,38 @@ function rendering(records: RecordData) {
   }
 }
 
+// 
+function opening(debugMode: boolean = false) {
+  if (debugMode) {
+    console.log('Opening dialog');
+    return;
+  }
+  // 画像を1枚と、このアンケートは個人情報を収集しませんという文言を表示したオープニングダイアログを構築する
+  const dialog = document.createElement('dialog');
+  dialog.id = 'opening-dialog';
+  dialog.classList.add('opening-dialog');
+  dialog.style.width = '80%';
+  dialog.innerHTML = `
+    <img src="./img/title.webp" alt="Kitten" width="100%"/>
+    <h2>防災ぱっかーんについて</h2>
+    <p>表示された質問にお答えいただき、最後に結果をご確認ください。このアンケートは個人情報を収集することを目的としません。入力内容は保存されず、ブラウザを閉じると消去されます。</p>
+    <p>それでは、始めましょう！</p>
+  `;
+  const button = RecordHtmlRenderer.createButton('閉じる');
+  button.classList.add('close-dialog');
+  button.style.display = 'block';
+  button.style.margin = '0 auto';
+  button.addEventListener('click', () => {
+    dialog.close();
+  });
+
+  dialog.appendChild(button);
+  document.body.appendChild(dialog);
+
+  dialog.showModal();
+}
+
+
 // GETパラメータにDEBUG=trueがあるときはデバッグモード
 const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.has('DEBUG')) {
@@ -40,6 +72,7 @@ if (urlParams.has('DEBUG')) {
 if (urlParams.has('MOCK')) {
   MOCKMODE = true;
 }
+
 
 
 // let recordData: RecordData;
@@ -73,6 +106,9 @@ else {
       // RecordDataを使用して何かを行う
       console.log(recordData);
       rendering(recordData);
+
+      // オープニングダイアログを表示
+      opening(DEBUGMODE);
     })
     .catch(error => {
       console.error('Error loading JSON:', error);
