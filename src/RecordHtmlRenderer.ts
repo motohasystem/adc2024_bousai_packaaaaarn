@@ -212,164 +212,165 @@ class RecordHtmlRenderer {
         parentElement.appendChild(button);
 
         // 採点ロジック
-        const calculateScore = () => {
-            console.log("採点ボタンがクリックされました");
-            let allQuestionsAnswered = true;
-            const forms = parentElement.querySelectorAll('form[data-question-form]');
-            let totalScore = 0;
 
-            // let categoryScores: { [key: string]: CategoryScore } = {};    // カテゴリ別のスコア
-            // スコアの合計を表示
-            const calculator = new ScoreCalculator('messages.json');
-
-
-            const effectRatios: string[] = [];
-            const answers: {
-                [key: string]: {
-                    value: number,
-                    effectRatio: string[],
-                    category: string
-                }
-            } = {}
-            forms.forEach((form) => {
-                const checkedInput = form.querySelector('input[type=radio]:checked');
-                if (!checkedInput) {
-                    allQuestionsAnswered = false;
-                } else {
-                    const record_number = (checkedInput as HTMLInputElement).name.split("_")[1];
-                    console.log(`設問レコード番号: ${record_number}`);
-                    // スコアの計算を行う
-                    const value = parseInt((checkedInput as HTMLInputElement).value) || 0;
-                    answers[record_number] = {
-                        value: value,
-                        effectRatio: [],
-                        category: checkedInput.getAttribute('category') || ""
-                    }
-
-                    // 影響係数を取得
-                    const effectRatio = (checkedInput as HTMLInputElement).getAttribute("data-effect-ratio");
-                    if (effectRatio) {
-                        console.log(`選択肢の影響係数: ${effectRatio}`);
-                        effectRatios.push(effectRatio);
-                    }
-                }
-            });
-
-            // 影響係数を割り当てる
-            effectRatios.forEach((ratio) => {
-                const ratioItems = ratio.split(", ");
-                ratioItems.forEach((item) => {
-                    const [target, coefficient] = item.split("*");
-                    if (answers[target]) {
-                        answers[target].effectRatio.push(coefficient)
-                    }
-                    else {
-                        console.warn(`対象が見つかりません: ${target}`);
-                    }
-                });
-            });
-
-            // 割り当てられた影響係数を計算する
-            for (const [_key, value] of Object.entries(answers)) {
-                let score = value.value;
-                value.effectRatio.forEach((ratio) => {
-                    score = score * parseFloat(ratio);
-                });
-                totalScore += score;
-
-                // カテゴリ別の集計
-                const category = value.category;
-                const questionNumber = parseInt(_key);
-                calculator.addEntry(category, score, questionNumber);
-            }
-
-            if (!allQuestionsAnswered && this.debugMode != true) {
-                alert("全ての質問に回答してください。");
-            } else {
-                const maxCategory = calculator.getMaxScoreCategory();
-                const maxScore = calculator.getCategoryTotalScore(maxCategory);
-                const minCategory = calculator.getMinScoreCategory();
-                const minScore = calculator.getCategoryTotalScore(minCategory);
-
-                console.log(`最大合計カテゴリ: ${maxCategory} - 合計: ${maxScore}`);
-                console.log(`最小合計カテゴリ: ${minCategory} - 合計: ${minScore}`);
-
-                // スコアが最大となるカテゴリと最小となるカテゴリのメッセージを取得し、両方のメッセージが出揃った段階でダイアログを表示する
-                Promise.all([
-                    calculator.getHighRiskMessage(maxCategory, true),
-                    calculator.getLowRiskMessage(minCategory, true)
-                ]).then(([highRiskMessage, lowRiskMessage]) => {
-                    console.log(`High riskメッセージ: ${highRiskMessage}`);
-                    console.log(`Low riskメッセージ: ${lowRiskMessage}`);
-                    // alert(`High riskメッセージ: ${highRiskMessage}\nLow riskメッセージ: ${lowRiskMessage}`);
-
-                    // high risk / low riskメッセージを、いい感じのダイアログで表示する
-                    const dialog = document.createElement('dialog');
-                    dialog.style.padding = '20px';
-                    dialog.style.borderRadius = '8px';
-                    dialog.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
-                    dialog.style.maxWidth = '600px';
-                    dialog.style.margin = 'auto';
-                    dialog.style.textAlign = 'left';
-                    dialog.style.fontSize = '14px';
-
-                    // トータルスコア
-                    const scoreParagraph = document.createElement('p');
-                    const headline = document.createElement('h2');
-                    headline.textContent = 'あなたの生活困窮リスクポイント';
-                    headline.style.textAlign = 'center';
-                    headline.style.marginBottom = '4px';
-                    dialog.appendChild(headline);
-
-                    scoreParagraph.innerHTML = `${totalScore} RP`;
-                    scoreParagraph.style.fontWeight = 'bold';
-                    scoreParagraph.style.textAlign = 'center';
-                    scoreParagraph.style.fontSize = '20px';
-                    scoreParagraph.style.marginBottom = '4px';
-
-                    // 閉じるボタン
-                    const closeButton = document.createElement('button');
-                    closeButton.textContent = '閉じる';
-                    closeButton.style.marginTop = '20px';
-                    closeButton.style.padding = '10px 20px';
-                    closeButton.style.backgroundColor = '#007BFF';
-                    closeButton.style.color = '#FFFFFF';
-                    closeButton.style.border = 'none';
-                    closeButton.style.borderRadius = '5px';
-                    closeButton.style.cursor = 'pointer';
-                    closeButton.style.transition = 'background-color 0.3s ease';
-                    closeButton.style.display = 'block';
-                    closeButton.style.marginLeft = 'auto';
-                    closeButton.style.marginRight = 'auto';
-                    closeButton.onmouseover = () => closeButton.style.backgroundColor = '#0056b3';
-                    closeButton.onmouseout = () => closeButton.style.backgroundColor = '#007BFF';
-                    closeButton.onclick = () => dialog.close();
-
-                    // 表示する画像を取得する
-                    const highRiskImage = calculator.getCategoryImageName(maxCategory);
-                    const lowRiskImage = calculator.getCategoryImageName(minCategory);
-
-                    const highRiskResult = this.createImageWithCaption(highRiskImage, highRiskMessage, "高リスク", "#990000");
-                    const lowRiskResult = this.createImageWithCaption(lowRiskImage, lowRiskMessage, "低リスク", "#009900");
-
-                    dialog.appendChild(scoreParagraph);
-                    dialog.appendChild(highRiskResult);
-
-                    dialog.appendChild(lowRiskResult);
-                    dialog.appendChild(closeButton);
-
-                    document.body.appendChild(dialog);
-                    dialog.showModal();
-
-                    dialog.scrollTop = 0;
-                });
-
-                // alert(`リスクポイントの合計: ${totalScore}`);
-            }
-        };
-
-        button.addEventListener("click", calculateScore);
+        button.addEventListener("click", () => this.calculateScore(parentElement));
     }
+
+    private calculateScore(parentElement: HTMLElement): void {
+        console.log("採点ボタンがクリックされました");
+        let allQuestionsAnswered = true;
+        const forms = parentElement.querySelectorAll('form[data-question-form]');
+        let totalScore = 0;
+
+        // let categoryScores: { [key: string]: CategoryScore } = {};    // カテゴリ別のスコア
+        // スコアの合計を表示
+        const calculator = new ScoreCalculator('messages.json');
+
+
+        const effectRatios: string[] = [];
+        const answers: {
+            [key: string]: {
+                value: number,
+                effectRatio: string[],
+                category: string
+            }
+        } = {}
+        forms.forEach((form) => {
+            const checkedInput = form.querySelector('input[type=radio]:checked');
+            if (!checkedInput) {
+                allQuestionsAnswered = false;
+            } else {
+                const record_number = (checkedInput as HTMLInputElement).name.split("_")[1];
+                console.log(`設問レコード番号: ${record_number}`);
+                // スコアの計算を行う
+                const value = parseInt((checkedInput as HTMLInputElement).value) || 0;
+                answers[record_number] = {
+                    value: value,
+                    effectRatio: [],
+                    category: checkedInput.getAttribute('category') || ""
+                }
+
+                // 影響係数を取得
+                const effectRatio = (checkedInput as HTMLInputElement).getAttribute("data-effect-ratio");
+                if (effectRatio) {
+                    console.log(`選択肢の影響係数: ${effectRatio}`);
+                    effectRatios.push(effectRatio);
+                }
+            }
+        });
+
+        // 影響係数を割り当てる
+        effectRatios.forEach((ratio) => {
+            const ratioItems = ratio.split(", ");
+            ratioItems.forEach((item) => {
+                const [target, coefficient] = item.split("*");
+                if (answers[target]) {
+                    answers[target].effectRatio.push(coefficient)
+                }
+                else {
+                    console.warn(`対象が見つかりません: ${target}`);
+                }
+            });
+        });
+
+        // 割り当てられた影響係数を計算する
+        for (const [_key, value] of Object.entries(answers)) {
+            let score = value.value;
+            value.effectRatio.forEach((ratio) => {
+                score = score * parseFloat(ratio);
+            });
+            totalScore += score;
+
+            // カテゴリ別の集計
+            const category = value.category;
+            const questionNumber = parseInt(_key);
+            calculator.addEntry(category, score, questionNumber);
+        }
+
+        if (!allQuestionsAnswered && this.debugMode != true) {
+            alert("全ての質問に回答してください。");
+        } else {
+            const maxCategory = calculator.getMaxScoreCategory();
+            const maxScore = calculator.getCategoryTotalScore(maxCategory);
+            const minCategory = calculator.getMinScoreCategory();
+            const minScore = calculator.getCategoryTotalScore(minCategory);
+
+            console.log(`最大合計カテゴリ: ${maxCategory} - 合計: ${maxScore}`);
+            console.log(`最小合計カテゴリ: ${minCategory} - 合計: ${minScore}`);
+
+            // スコアが最大となるカテゴリと最小となるカテゴリのメッセージを取得し、両方のメッセージが出揃った段階でダイアログを表示する
+            Promise.all([
+                calculator.getHighRiskMessage(maxCategory, true),
+                calculator.getLowRiskMessage(minCategory, true)
+            ]).then(([highRiskMessage, lowRiskMessage]) => {
+                console.log(`High riskメッセージ: ${highRiskMessage}`);
+                console.log(`Low riskメッセージ: ${lowRiskMessage}`);
+                // alert(`High riskメッセージ: ${highRiskMessage}\nLow riskメッセージ: ${lowRiskMessage}`);
+
+                // high risk / low riskメッセージを、いい感じのダイアログで表示する
+                const dialog = document.createElement('dialog');
+                dialog.style.padding = '20px';
+                dialog.style.borderRadius = '8px';
+                dialog.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+                dialog.style.maxWidth = '600px';
+                dialog.style.margin = 'auto';
+                dialog.style.textAlign = 'left';
+                dialog.style.fontSize = '14px';
+
+                // トータルスコア
+                const scoreParagraph = document.createElement('p');
+                const headline = document.createElement('h2');
+                headline.textContent = 'あなたの生活困窮リスクポイント';
+                headline.style.textAlign = 'center';
+                headline.style.marginBottom = '4px';
+                dialog.appendChild(headline);
+
+                scoreParagraph.innerHTML = `${totalScore} RP`;
+                scoreParagraph.style.fontWeight = 'bold';
+                scoreParagraph.style.textAlign = 'center';
+                scoreParagraph.style.fontSize = '20px';
+                scoreParagraph.style.marginBottom = '4px';
+
+                // 閉じるボタン
+                const closeButton = document.createElement('button');
+                closeButton.textContent = '閉じる';
+                closeButton.style.marginTop = '20px';
+                closeButton.style.padding = '10px 20px';
+                closeButton.style.backgroundColor = '#007BFF';
+                closeButton.style.color = '#FFFFFF';
+                closeButton.style.border = 'none';
+                closeButton.style.borderRadius = '5px';
+                closeButton.style.cursor = 'pointer';
+                closeButton.style.transition = 'background-color 0.3s ease';
+                closeButton.style.display = 'block';
+                closeButton.style.marginLeft = 'auto';
+                closeButton.style.marginRight = 'auto';
+                closeButton.onmouseover = () => closeButton.style.backgroundColor = '#0056b3';
+                closeButton.onmouseout = () => closeButton.style.backgroundColor = '#007BFF';
+                closeButton.onclick = () => dialog.close();
+
+                // 表示する画像を取得する
+                const highRiskImage = calculator.getCategoryImageName(maxCategory);
+                const lowRiskImage = calculator.getCategoryImageName(minCategory);
+
+                const highRiskResult = this.createImageWithCaption(highRiskImage, highRiskMessage, "高リスク", "#990000");
+                const lowRiskResult = this.createImageWithCaption(lowRiskImage, lowRiskMessage, "低リスク", "#009900");
+
+                dialog.appendChild(scoreParagraph);
+                dialog.appendChild(highRiskResult);
+
+                dialog.appendChild(lowRiskResult);
+                dialog.appendChild(closeButton);
+
+                document.body.appendChild(dialog);
+                dialog.showModal();
+
+                dialog.scrollTop = 0;
+            });
+
+            // alert(`リスクポイントの合計: ${totalScore}`);
+        }
+    };
 
     // img要素とp要素を受け取り、画像の上にP要素を重ねた要素を作成して返す
     private createImageWithCaption(imageFilename: string, caption: string, label: string, color: string): HTMLDivElement {
