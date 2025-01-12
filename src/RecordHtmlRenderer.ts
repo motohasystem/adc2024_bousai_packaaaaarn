@@ -18,6 +18,23 @@ class RecordHtmlRenderer {
         this.debugMode = debugMode;
     }
 
+    static createButton(label: string): HTMLButtonElement {
+        const button = document.createElement("button");
+        button.textContent = label;
+        button.style.padding = "10px 20px";
+        button.style.backgroundColor = "#007BFF";
+        button.style.color = "white";
+        button.style.border = "none";
+        button.style.borderRadius = "5px";
+        button.style.cursor = "pointer";
+        button.style.transition = "background-color 0.3s ease";
+        button.onmouseover = () => button.style.backgroundColor = "#0056b3";
+        button.onmouseout = () => button.style.backgroundColor = "#007BFF";
+
+        return button;
+
+    }
+
     // カテゴリごとにCSSクラス名を取得するメソッド
     private getCategoryClass(category: string): string {
         const categoryClasses: { [key: string]: string } = {
@@ -197,25 +214,18 @@ class RecordHtmlRenderer {
         });
 
         // 採点ボタン
-        const button = document.createElement("button");
-        button.id = "calculateScore";
-        button.textContent = "採点する";
+        const button = RecordHtmlRenderer.createButton("採点する");
         button.style.position = "fixed";
         button.style.bottom = "20px";
         button.style.right = "20px";
-        button.style.padding = "10px 20px";
-        button.style.backgroundColor = "#007BFF";
-        button.style.color = "white";
-        button.style.border = "none";
-        button.style.borderRadius = "5px";
-        button.style.cursor = "pointer";
+
         parentElement.appendChild(button);
 
         // 採点ロジック
-
         button.addEventListener("click", () => this.calculateScore(parentElement));
     }
 
+    // 採点ボタンがクリックされたときの処理
     private calculateScore(parentElement: HTMLElement): void {
         console.log("採点ボタンがクリックされました");
         let allQuestionsAnswered = true;
@@ -287,7 +297,7 @@ class RecordHtmlRenderer {
             calculator.addEntry(category, score, questionNumber);
         }
 
-        if (!allQuestionsAnswered && this.debugMode != true) {
+        if ((!allQuestionsAnswered && this.debugMode != true)) {
             alert("全ての質問に回答してください。");
         } else {
             const maxCategory = calculator.getMaxScoreCategory();
@@ -332,21 +342,10 @@ class RecordHtmlRenderer {
                 scoreParagraph.style.marginBottom = '4px';
 
                 // 閉じるボタン
-                const closeButton = document.createElement('button');
-                closeButton.textContent = '閉じる';
-                closeButton.style.marginTop = '20px';
-                closeButton.style.padding = '10px 20px';
-                closeButton.style.backgroundColor = '#007BFF';
-                closeButton.style.color = '#FFFFFF';
-                closeButton.style.border = 'none';
-                closeButton.style.borderRadius = '5px';
-                closeButton.style.cursor = 'pointer';
-                closeButton.style.transition = 'background-color 0.3s ease';
+                const closeButton = RecordHtmlRenderer.createButton('閉じる');
                 closeButton.style.display = 'block';
                 closeButton.style.marginLeft = 'auto';
                 closeButton.style.marginRight = 'auto';
-                closeButton.onmouseover = () => closeButton.style.backgroundColor = '#0056b3';
-                closeButton.onmouseout = () => closeButton.style.backgroundColor = '#007BFF';
                 closeButton.onclick = () => dialog.close();
 
                 // 表示する画像を取得する
