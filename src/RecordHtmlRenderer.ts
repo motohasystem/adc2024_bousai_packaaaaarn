@@ -1,3 +1,4 @@
+import { CONSTANTS as C } from "./constants";
 import { Impact, RecordData, SValue } from "./RecordData";
 import { ScoreCalculator } from "./ScoreCalculator";
 
@@ -105,9 +106,12 @@ class RecordHtmlRenderer {
     // カテゴリ別の質問一覧をDOMとして出力
     renderCategoryQuestions(parentElement: HTMLElement): void {
         const categories = this.recordData.getCategories();
+        const header = document.createElement("h2")
+        header.textContent = C.ProjectName
+        parentElement.appendChild(header);
 
         const title = document.createElement("h1");
-        title.textContent = "防災ぱっかーんスコアリング";
+        title.textContent = C.ProductName + "スコアリング";
         parentElement.appendChild(title);
 
         categories.forEach((category) => {
