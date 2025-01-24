@@ -111,7 +111,7 @@ class RecordHtmlRenderer {
         parentElement.appendChild(header);
 
         const title = document.createElement("h1");
-        title.textContent = C.ProductName + "スコアリング";
+        title.textContent = C.ProductName + C.Subtitle;
         parentElement.appendChild(title);
 
         categories.forEach((category) => {
