@@ -4,14 +4,12 @@ import { RecordHtmlRenderer } from './RecordHtmlRenderer.ts';
 
 // デバッグモード用のjsonファイル
 import apiSample from './resource/api_sample.json';
+import { CONSTANTS as C, MESSAGES as M } from './constants.ts';
 
 
 // 定数定義
 let DEBUGMODE = false;  // デバッグモード
 let MOCKMODE = false;   // APIを呼び出さないモックモード
-
-const API_URL = 'https://f56gy9u3sa.execute-api.ap-northeast-1.amazonaws.com/dev/items'
-const API_KEY = import.meta.env.VITE_API_KEY || '';
 
 // Start of Selection
 
@@ -32,6 +30,39 @@ function rendering(records: RecordData) {
   }
 }
 
+// 
+function opening(debugMode: boolean = false) {
+  if (debugMode) {
+    console.log('Opening dialog');
+    return;
+  }
+  // 画像を1枚と、このアンケートは個人情報を収集しませんという文言を表示したオープニングダイアログを構築する
+  const dialog = document.createElement('dialog');
+  dialog.id = 'opening-dialog';
+  dialog.classList.add('opening-dialog');
+  dialog.style.width = '80%';
+  dialog.style.maxWidth = '800px';
+  dialog.innerHTML = `
+    <img src="./img/title.webp" alt="Kitten" width="100%" style="max-width: 800px;"/>
+    <h2>${C.ProjectName} / ${C.ProductName}について</h2>
+    <p>${M.OPENING}</p>
+    <p>それでは、始めましょう！</p>
+  `;
+  const button = RecordHtmlRenderer.createButton('閉じる');
+  button.classList.add('close-dialog');
+  button.style.display = 'block';
+  button.style.margin = '0 auto';
+  button.addEventListener('click', () => {
+    dialog.close();
+  });
+
+  dialog.appendChild(button);
+  document.body.appendChild(dialog);
+
+  dialog.showModal();
+}
+
+
 // GETパラメータにDEBUG=trueがあるときはデバッグモード
 const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.has('DEBUG')) {
@@ -40,6 +71,7 @@ if (urlParams.has('DEBUG')) {
 if (urlParams.has('MOCK')) {
   MOCKMODE = true;
 }
+
 
 
 // let recordData: RecordData;
@@ -58,12 +90,12 @@ if (MOCKMODE) {
 else {
   console.log('MOCKMODE: OFF');
   // API_URLにGETリクエストを送信
-  console.log(API_KEY)
-  fetch(API_URL, {
+  console.log(C.API_KEY)
+  fetch(C.API_URL, {
     method: 'GET',
     mode: 'cors', // CORS対応
     headers: {
-      'x-api-key': API_KEY
+      'x-api-key': C.API_KEY
     }
   })
     .then(response => response.json())
@@ -73,6 +105,9 @@ else {
       // RecordDataを使用して何かを行う
       console.log(recordData);
       rendering(recordData);
+
+      // オープニングダイアログを表示
+      opening(DEBUGMODE);
     })
     .catch(error => {
       console.error('Error loading JSON:', error);

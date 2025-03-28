@@ -59,6 +59,7 @@ interface RecordItem {
     更新日時: SValue;
     備考: SValue;
     カテゴリ: SValue;
+    カテゴリ内の表示順序: SValue;
     更新者: MValue<CreatorUpdater>;
     作成日時: SValue;
     レコード番号: SValue;
@@ -70,6 +71,7 @@ interface RecordItem {
     課題: SValue;
     Systemrevision: SValue;
     "requestContext.stage": SValue;
+    アンケート表示: SValue;
 }
 
 // ルートオブジェクト
@@ -81,6 +83,7 @@ interface RootObject {
 export class RecordData {
     public count: number;
     public items: RecordItem[];
+    public VisibleFlagFieldCode: string = 'アンケート表示';
 
     constructor(data: RootObject) {
         this.count = data.Count;
@@ -125,12 +128,12 @@ export class RecordData {
 
 
         return this.items.reduce((table: Impact[][], item) => {
-            console.log({ item: item.レコード番号.S, record_number });
+            // console.log({ item: item.レコード番号.S, record_number });
             if (record_number !== undefined && item.レコード番号.S !== record_number) {
-                console.log('一致してない')
+                // console.log('一致してない')
                 return table;
             }
-            console.log('一致してる')
+            // console.log('一致してる')
 
             const subtable = item.影響する設問テーブル.L.reduce((acc: Impact[], impact) => {
                 // 設問のレコード番号
@@ -156,7 +159,7 @@ export class RecordData {
     // 影響する設問テーブルの項目を扱いやすい形に変換するメソッド
     composeImpact(impact: MValue<TableItem>): Impact {
 
-        console.log({ impact });
+        // console.log({ impact });
         const cond = impact.M.value.M.条件.M.value as SValue;   // 条件式
         const target_question = impact.M.value.M.設問のレコード番号.M.value as SValue; // 対象設問番号
         const expect = impact.M.value.M.条件の値.M.value as SValue; // 評価値
@@ -192,6 +195,18 @@ export class RecordData {
 
     // カテゴリを指定してitemsを取得するメソッド
     getItemsByCategory(category: string): RecordItem[] {
-        return this.items.filter((item) => item.カテゴリ?.S === category);
+        return this.items.filter((item) => {
+            // @ts-ignore
+            const visibleFlag = item[this.VisibleFlagFieldCode]?.S;
+            if (visibleFlag === '無効') {
+                return false;
+            }
+
+            return item.カテゴリ?.S === category
+        }).sort((a, b) => {
+            const orderA = parseInt(a.カテゴリ内の表示順序.S, 10) || Infinity;
+            const orderB = parseInt(b.カテゴリ内の表示順序.S, 10) || Infinity;
+            return orderA - orderB;
+        });
     }
 }
