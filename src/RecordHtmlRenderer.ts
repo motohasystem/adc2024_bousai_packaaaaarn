@@ -1,6 +1,7 @@
 import { CONSTANTS as C } from "./constants";
 import { Impact, RecordData, SValue } from "./RecordData";
 import { ScoreCalculator } from "./ScoreCalculator";
+import { GetParamsManager } from "./GetParamsManager";
 
 export type CategoryScore = {
     sum: number;
@@ -13,10 +14,12 @@ export type CategoryScore = {
 class RecordHtmlRenderer {
     private recordData: RecordData;
     private debugMode: boolean;
+    private paramsManager: GetParamsManager;
 
     constructor(recordData: RecordData, debugMode: boolean = false) {
         this.recordData = recordData;
         this.debugMode = debugMode;
+        this.paramsManager = new GetParamsManager();
     }
 
     static createButton(label: string): HTMLButtonElement {
@@ -140,11 +143,13 @@ class RecordHtmlRenderer {
                 form.setAttribute("data-question-form", item.レコード番号.S);
                 questionDiv.appendChild(form);
 
-                item.選択肢テーブル.L.forEach((choice) => {
+                // 選択肢をラジオボタンとして追加
+                item.選択肢テーブル.L.forEach((choice, optionNumber) => {
                     // const choiceId = (choice.M.id as SValue).S;
                     const record_number = item.レコード番号.S
                     let choiceText = (choice.M.value.M.回答項目.M.value as SValue).S;
                     const choiceValue = (choice.M.value.M.リスクポイント.M.value as SValue).S;
+                    // const optionNumber = (choice.M.value.M.選択肢番号.M.value as SValue).S;
 
                     const label = document.createElement("label");
                     const input = document.createElement("input");
@@ -152,6 +157,15 @@ class RecordHtmlRenderer {
                     input.name = `question_${record_number}`;
                     input.value = choiceValue
                     input.setAttribute('category', category);
+
+                    if (this.paramsManager.isSelected(record_number, optionNumber.toString())) {
+                        input.checked = true;
+                    }
+
+                    // クリックイベントでGETパラメータを設定
+                    input.addEventListener("click", () => {
+                        this.paramsManager.setParam(record_number, optionNumber.toString());
+                    });
 
                     const impactTable = this.recordData.getImpactTable(record_number);
                     const impactRatio = this.composeImpactRatioString(choiceValue, impactTable); // 他の回答に与える係数
@@ -189,6 +203,7 @@ class RecordHtmlRenderer {
                     questionDiv.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)";
                 });
 
+                // マウスアウト時のスタイル追加
                 questionDiv.addEventListener("mouseleave", () => {
                     const hasCheckedInput = questionDiv.querySelector('input[type=radio]:checked');
                     if (hasCheckedInput != null) {
@@ -329,7 +344,7 @@ class RecordHtmlRenderer {
                 dialog.style.maxWidth = '600px';
                 dialog.style.margin = 'auto';
                 dialog.style.textAlign = 'left';
-                dialog.style.fontSize = '14px';
+                // dialog.style.fontSize = '14px';
 
                 // トータルスコア
                 const scoreParagraph = document.createElement('p');
@@ -342,7 +357,7 @@ class RecordHtmlRenderer {
                 scoreParagraph.innerHTML = `${totalScore} RP`;
                 scoreParagraph.style.fontWeight = 'bold';
                 scoreParagraph.style.textAlign = 'center';
-                scoreParagraph.style.fontSize = '20px';
+                scoreParagraph.style.fontSize = 'xx-large';
                 scoreParagraph.style.marginBottom = '4px';
 
                 // 閉じるボタン
@@ -363,6 +378,36 @@ class RecordHtmlRenderer {
                 dialog.appendChild(highRiskResult);
 
                 dialog.appendChild(lowRiskResult);
+
+                // ダイアログの下部に現在のURLをQRコードとして表示する
+                const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.href)}`;
+                const qrCodeImage = document.createElement('img');
+                qrCodeImage.src = qrCodeUrl;
+                qrCodeImage.alt = 'QRコード';
+                qrCodeImage.style.display = 'block';
+                qrCodeImage.style.margin = '20px auto';
+                qrCodeImage.style.maxWidth = '100%';
+
+                dialog.appendChild(qrCodeImage);
+
+                // URLをクリップボードにコピーするボタンを配置する
+                const copyButton = RecordHtmlRenderer.createButton('URLをコピーする');
+                copyButton.style.display = 'block';
+                copyButton.onclick = () => {
+                    navigator.clipboard.writeText(window.location.href).then(() => {
+                        alert('URLがクリップボードにコピーされました。');
+                    }).catch(err => {
+                        console.error('URLのコピーに失敗しました: ', err);
+                    });
+                };
+                copyButton.style.marginLeft = 'auto';
+                copyButton.style.marginRight = 'auto';
+                copyButton.style.marginTop = '10px';
+                copyButton.style.marginBottom = '10px';
+                copyButton.style.backgroundColor = '#28a745'; // 緑色に変更
+                dialog.appendChild(copyButton);
+
+                // ダイアログの下部に閉じるボタンを追加
                 dialog.appendChild(closeButton);
 
                 document.body.appendChild(dialog);
