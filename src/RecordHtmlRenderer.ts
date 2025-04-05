@@ -357,8 +357,11 @@ class RecordHtmlRenderer {
 
                 dialog.appendChild(lowRiskResult);
 
+                // 現在のURLから、#を除いたURLを取得する
+                const currentUrl = window.location.href.split("#")[0];
+
                 // ダイアログの下部に現在のURLをQRコードとして表示する
-                const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.href)}`;
+                const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(currentUrl)}`;
                 const qrCodeImage = document.createElement('img');
                 qrCodeImage.src = qrCodeUrl;
                 qrCodeImage.alt = 'QRコード';
@@ -369,7 +372,7 @@ class RecordHtmlRenderer {
                 const copyButton = RecordHtmlRenderer.createButton('URLをコピーする');
                 copyButton.className = 'copy-url-button'; // クラス名を追加
                 copyButton.onclick = () => {
-                    navigator.clipboard.writeText(window.location.href).then(() => {
+                    navigator.clipboard.writeText(currentUrl).then(() => {
                         alert('URLがクリップボードにコピーされました。');
                     }).catch(err => {
                         console.error('URLのコピーに失敗しました: ', err);
