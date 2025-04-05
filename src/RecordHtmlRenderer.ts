@@ -158,6 +158,10 @@ class RecordHtmlRenderer {
                     input.value = choiceValue
                     input.setAttribute('category', category);
 
+                    if (this.paramsManager.isSelected(record_number, index.toString())) {
+                        input.checked = true;
+                    }
+
                     // クリックイベントでGETパラメータを設定
                     input.addEventListener("click", () => {
                         this.paramsManager.setParam(record_number, index.toString());

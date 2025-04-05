@@ -35,6 +35,12 @@ export class GetParamsManager {
         }
     }
 
+    // キーとバリューを指定して、すでにそのパラメータが存在していて、指定したバリューが選択されていればtrueを返す。
+    // それ以外はfalseを返す
+    public isSelected(key: string, value: string): boolean {
+        return this.params[key] === value;
+    }
+
     // 指定したキーの値を取得する。存在しない場合はundefinedを返す
     public getParam(key: string): string | undefined {
         return this.params[key];
