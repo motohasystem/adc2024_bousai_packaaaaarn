@@ -320,33 +320,23 @@ class RecordHtmlRenderer {
                 // high risk / low riskメッセージを、いい感じのダイアログで表示する
                 const dialog = document.createElement('dialog');
                 dialog.className = 'result-dialog';
-                dialog.style.borderRadius = '8px';
-                dialog.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
-                dialog.style.maxWidth = '600px';
-                dialog.style.margin = 'auto';
-                dialog.style.textAlign = 'left';
-                // dialog.style.fontSize = '14px';
 
                 // トータルスコア
                 const scoreParagraph = document.createElement('p');
                 const headline = document.createElement('h2');
                 headline.textContent = 'あなたの生活困窮リスクポイント';
-                headline.style.textAlign = 'center';
-                headline.style.marginBottom = '4px';
+                headline.className = 'dialog-headline';
                 dialog.appendChild(headline);
 
                 scoreParagraph.innerHTML = `${totalScore} RP`;
-                scoreParagraph.style.fontWeight = 'bold';
-                scoreParagraph.style.textAlign = 'center';
-                scoreParagraph.style.fontSize = 'xx-large';
-                scoreParagraph.style.marginBottom = '4px';
+                scoreParagraph.className = 'dialog-score';
+                dialog.appendChild(scoreParagraph);
 
                 // 閉じるボタン
                 const closeButton = RecordHtmlRenderer.createButton('閉じる');
-                closeButton.style.display = 'block';
-                closeButton.style.marginLeft = 'auto';
-                closeButton.style.marginRight = 'auto';
+                closeButton.className = 'dialog-close-button';
                 closeButton.onclick = () => dialog.close();
+                dialog.appendChild(closeButton);
 
                 // 表示する画像を取得する
                 const highRiskImage = calculator.getCategoryImageName(maxCategory);
@@ -365,15 +355,12 @@ class RecordHtmlRenderer {
                 const qrCodeImage = document.createElement('img');
                 qrCodeImage.src = qrCodeUrl;
                 qrCodeImage.alt = 'QRコード';
-                qrCodeImage.style.display = 'block';
-                qrCodeImage.style.margin = '20px auto';
-                qrCodeImage.style.maxWidth = '100%';
-
+                qrCodeImage.className = 'qr-code-image'; // クラス名を追加
                 dialog.appendChild(qrCodeImage);
 
                 // URLをクリップボードにコピーするボタンを配置する
                 const copyButton = RecordHtmlRenderer.createButton('URLをコピーする');
-                copyButton.style.display = 'block';
+                copyButton.className = 'copy-url-button'; // クラス名を追加
                 copyButton.onclick = () => {
                     navigator.clipboard.writeText(window.location.href).then(() => {
                         alert('URLがクリップボードにコピーされました。');
@@ -381,11 +368,6 @@ class RecordHtmlRenderer {
                         console.error('URLのコピーに失敗しました: ', err);
                     });
                 };
-                copyButton.style.marginLeft = 'auto';
-                copyButton.style.marginRight = 'auto';
-                copyButton.style.marginTop = '10px';
-                copyButton.style.marginBottom = '10px';
-                copyButton.style.backgroundColor = '#28a745'; // 緑色に変更
                 dialog.appendChild(copyButton);
 
                 // ダイアログの下部に閉じるボタンを追加
@@ -404,25 +386,19 @@ class RecordHtmlRenderer {
     // img要素とp要素を受け取り、画像の上にP要素を重ねた要素を作成して返す
     private createImageWithCaption(imageFilename: string, caption: string, label: string, color: string): HTMLDivElement {
         // url形式にする
-        const imageUrl = `./img/${imageFilename}`
+        const imageUrl = `./img/${imageFilename}`;
 
         const lowRiskParagraph = document.createElement('p');
         lowRiskParagraph.innerHTML = `<h3>${label}:</h3>${caption}`;
-        lowRiskParagraph.style.color = color;
-        lowRiskParagraph.style.zIndex = "1";
-        lowRiskParagraph.style.margin = "0";
-        lowRiskParagraph.style.width = "100%"; // 画像と同じ横幅に設定
-        lowRiskParagraph.style.fontWeight = "bold";
+        lowRiskParagraph.className = 'caption-text'; // クラス名を追加
+        lowRiskParagraph.style.color = color; // 色は動的に設定
 
         const container = document.createElement("div");
-        container.style.justifyContent = "center";
-        container.style.alignItems = "center";
+        container.className = 'image-caption-container'; // クラス名を追加
 
         const image = document.createElement("img");
         image.src = imageUrl;
-        image.style.width = "100%";
-        image.style.height = "auto";
-        image.style.zIndex = "0";
+        image.className = 'caption-image'; // クラス名を追加
 
         container.appendChild(image);
         container.appendChild(lowRiskParagraph);
