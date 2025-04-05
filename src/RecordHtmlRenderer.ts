@@ -344,7 +344,7 @@ class RecordHtmlRenderer {
                 dialog.style.maxWidth = '600px';
                 dialog.style.margin = 'auto';
                 dialog.style.textAlign = 'left';
-                dialog.style.fontSize = '14px';
+                // dialog.style.fontSize = '14px';
 
                 // トータルスコア
                 const scoreParagraph = document.createElement('p');
@@ -357,7 +357,7 @@ class RecordHtmlRenderer {
                 scoreParagraph.innerHTML = `${totalScore} RP`;
                 scoreParagraph.style.fontWeight = 'bold';
                 scoreParagraph.style.textAlign = 'center';
-                scoreParagraph.style.fontSize = '20px';
+                scoreParagraph.style.fontSize = 'xx-large';
                 scoreParagraph.style.marginBottom = '4px';
 
                 // 閉じるボタン
@@ -378,6 +378,36 @@ class RecordHtmlRenderer {
                 dialog.appendChild(highRiskResult);
 
                 dialog.appendChild(lowRiskResult);
+
+                // ダイアログの下部に現在のURLをQRコードとして表示する
+                const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.href)}`;
+                const qrCodeImage = document.createElement('img');
+                qrCodeImage.src = qrCodeUrl;
+                qrCodeImage.alt = 'QRコード';
+                qrCodeImage.style.display = 'block';
+                qrCodeImage.style.margin = '20px auto';
+                qrCodeImage.style.maxWidth = '100%';
+
+                dialog.appendChild(qrCodeImage);
+
+                // URLをクリップボードにコピーするボタンを配置する
+                const copyButton = RecordHtmlRenderer.createButton('URLをコピーする');
+                copyButton.style.display = 'block';
+                copyButton.onclick = () => {
+                    navigator.clipboard.writeText(window.location.href).then(() => {
+                        alert('URLがクリップボードにコピーされました。');
+                    }).catch(err => {
+                        console.error('URLのコピーに失敗しました: ', err);
+                    });
+                };
+                copyButton.style.marginLeft = 'auto';
+                copyButton.style.marginRight = 'auto';
+                copyButton.style.marginTop = '10px';
+                copyButton.style.marginBottom = '10px';
+                copyButton.style.backgroundColor = '#28a745'; // 緑色に変更
+                dialog.appendChild(copyButton);
+
+                // ダイアログの下部に閉じるボタンを追加
                 dialog.appendChild(closeButton);
 
                 document.body.appendChild(dialog);
