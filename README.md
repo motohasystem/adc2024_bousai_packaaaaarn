@@ -32,6 +32,8 @@ npm run dev
 
 https://motohasystem.github.io/bpack_api/v0/items.json
 
+研究成果を反映した最新版のアンケートデータのご利用については別途お問い合わせください。
+
 ## 貢献方法
 問題や改善点があれば、Issue を立てるかプルリクエストを送ってください。貢献していただけると幸いです。
 
