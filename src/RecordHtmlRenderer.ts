@@ -25,15 +25,7 @@ class RecordHtmlRenderer {
     static createButton(label: string): HTMLButtonElement {
         const button = document.createElement("button");
         button.textContent = label;
-        button.style.padding = "10px 20px";
-        button.style.backgroundColor = "#007BFF";
-        button.style.color = "white";
-        button.style.border = "none";
-        button.style.borderRadius = "5px";
-        button.style.cursor = "pointer";
-        button.style.transition = "background-color 0.3s ease";
-        button.onmouseover = () => button.style.backgroundColor = "#0056b3";
-        button.onmouseout = () => button.style.backgroundColor = "#007BFF";
+        button.className = "btn";
 
         return button;
 
@@ -129,7 +121,7 @@ class RecordHtmlRenderer {
             items.forEach((item, index) => {
                 const questionDiv = document.createElement("div");
                 questionDiv.className = categoryClass;
-                questionDiv.style.transition = "all 0.5s ease";
+                questionDiv.classList.add("question-div");
 
                 const questionText = document.createElement("p");
 
@@ -184,12 +176,12 @@ class RecordHtmlRenderer {
                             questionText.textContent = `✅ 質問 ${index + 1}: ${item.質問文.S} - 選択: ${choiceText}`;
 
                             // 選択肢とフォームを非表示
-                            form.style.display = "none";
+                            form.classList.add("hidden");
 
                             // 質問ブロック全体をアニメーションして縮小
                             questionDiv.style.transition = "transform 1s ease-in-out, opacity 1s ease-in-out, background-color 1s ease-in-out";
 
-                            questionDiv.style.transform = "scale(1) translateY(-5px)";
+                            questionDiv.classList.add("question-div-selected");
                             questionDiv.style.opacity = "0.7";
                             questionDiv.style.backgroundColor = "#f0f0f0"; // 背景色を変更
                         }
@@ -198,21 +190,16 @@ class RecordHtmlRenderer {
 
                 // ホバー時のスタイル追加
                 questionDiv.addEventListener("mouseenter", () => {
-                    questionDiv.style.transform = "scale(1) translateY(-5px)";
-                    questionDiv.style.opacity = "1";
-                    questionDiv.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)";
+                    questionDiv.classList.add("question-div-hover");
                 });
 
                 // マウスアウト時のスタイル追加
                 questionDiv.addEventListener("mouseleave", () => {
-                    const hasCheckedInput = questionDiv.querySelector('input[type=radio]:checked');
-                    if (hasCheckedInput != null) {
-                        questionDiv.style.transform = "scale(1) translateY(-5px)";
-                        questionDiv.style.opacity = "0.7";
-                        questionDiv.style.boxShadow = "none";
-                    }
-                    else {
-                        questionDiv.style.transform = "scale(1) translateY(5px)";
+                    questionDiv.classList.remove("question-div-hover");
+                    if (questionDiv.querySelector('input[type=radio]:checked') != null) {
+                        questionDiv.classList.add("question-div-selected");
+                    } else {
+                        questionDiv.classList.add("question-div-unhover");
                     }
                 });
 
@@ -221,7 +208,7 @@ class RecordHtmlRenderer {
                     const hasCheckedInput = questionDiv.querySelector('input[type=radio]:checked');
 
                     if (hasCheckedInput != null) {
-                        form.style.display = "block";
+                        form.classList.remove("hidden");
                         questionText.textContent = `質問 ${index + 1}: ${item.質問文.S}`;
                         // questionDiv.style.transform = "scale(1)";
                         // questionDiv.style.opacity = "1";
@@ -234,9 +221,7 @@ class RecordHtmlRenderer {
 
         // 採点ボタン
         const button = RecordHtmlRenderer.createButton("採点する");
-        button.style.position = "fixed";
-        button.style.bottom = "20px";
-        button.style.right = "20px";
+        button.classList.add("fixed-button");
 
         parentElement.appendChild(button);
 
@@ -338,7 +323,7 @@ class RecordHtmlRenderer {
 
                 // high risk / low riskメッセージを、いい感じのダイアログで表示する
                 const dialog = document.createElement('dialog');
-                dialog.style.padding = '20px';
+                dialog.className = 'result-dialog';
                 dialog.style.borderRadius = '8px';
                 dialog.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
                 dialog.style.maxWidth = '600px';
