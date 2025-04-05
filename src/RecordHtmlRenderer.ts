@@ -144,7 +144,7 @@ class RecordHtmlRenderer {
                 questionDiv.appendChild(form);
 
                 // 選択肢をラジオボタンとして追加
-                item.選択肢テーブル.L.forEach((choice, index) => {
+                item.選択肢テーブル.L.forEach((choice, optionNumber) => {
                     // const choiceId = (choice.M.id as SValue).S;
                     const record_number = item.レコード番号.S
                     let choiceText = (choice.M.value.M.回答項目.M.value as SValue).S;
@@ -158,13 +158,13 @@ class RecordHtmlRenderer {
                     input.value = choiceValue
                     input.setAttribute('category', category);
 
-                    if (this.paramsManager.isSelected(record_number, index.toString())) {
+                    if (this.paramsManager.isSelected(record_number, optionNumber.toString())) {
                         input.checked = true;
                     }
 
                     // クリックイベントでGETパラメータを設定
                     input.addEventListener("click", () => {
-                        this.paramsManager.setParam(record_number, index.toString());
+                        this.paramsManager.setParam(record_number, optionNumber.toString());
                     });
 
                     const impactTable = this.recordData.getImpactTable(record_number);
