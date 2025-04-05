@@ -108,6 +108,7 @@ class RecordHtmlRenderer {
         const title = document.createElement("h1");
         title.textContent = C.ProductName + C.Subtitle;
         parentElement.appendChild(title);
+        let wholeIndexCount = 0;
 
         categories.forEach((category) => {
             const categoryClass = this.getCategoryClass(category);
@@ -119,10 +120,11 @@ class RecordHtmlRenderer {
             const items = this.recordData.getItemsByCategory(category);
 
             items.forEach((item, index) => {
+                wholeIndexCount += 1;
                 const questionDiv = document.createElement("div");
                 questionDiv.className = categoryClass;
                 questionDiv.classList.add("question-div");
-                questionDiv.id = `index_${index}`;
+                questionDiv.id = `index_${wholeIndexCount}`;
 
                 const questionText = document.createElement("p");
 
@@ -133,6 +135,8 @@ class RecordHtmlRenderer {
                 questionDiv.appendChild(questionText);
 
                 const form = document.createElement("form");
+                form.setAttribute("next_index", (wholeIndexCount + 1).toString());
+
                 const record_number = item.レコード番号.S;
                 form.setAttribute("data-question-form", record_number);
                 questionDiv.appendChild(form);
@@ -181,8 +185,12 @@ class RecordHtmlRenderer {
                             // 質問ブロック全体をアニメーションして縮小
                             questionDiv.classList.add("question-div-transition", "question-div-selected");
 
+                            // 次の質問のインデックスを取得
+                            const nextIndex = parseInt(form.getAttribute("next_index") || "0", 10);
+
                             // 次の質問までスクロールする
-                            const nextQuestionDiv = parentElement.querySelector(`div[id="index_${index + 1}"]`);
+                            const nextQuestionDiv = parentElement.querySelector(`div[id="index_${nextIndex}"]`);
+                            console.log({ nextIndex, nextQuestionDiv });
                             if (nextQuestionDiv) {
                                 nextQuestionDiv.scrollIntoView({ behavior: "smooth", block: "start" });
                             }
