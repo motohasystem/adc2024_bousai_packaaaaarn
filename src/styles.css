@@ -58,3 +58,20 @@ label {
 input[type="radio"] {
   margin-right: 10px;
 }
+
+/* スマホ表示時の文字サイズを大きくする */
+@media only screen and (max-width: 600px) {
+  body {
+    font-size: 1.2em;
+  }
+  h2 {
+    font-size: 1.5em;
+  }
+  p,
+  label {
+    font-size: 1.3em;
+  }
+  div {
+    font-size: 1.1em;
+  }
+}
