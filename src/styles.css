@@ -74,4 +74,247 @@ input[type="radio"] {
   div {
     font-size: 1.1em;
   }
+  button {
+    font-size: 1.3em;
+  }
+}
+
+/* Custom classes from inline style refactor */
+.btn {
+  padding: 10px 20px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.btn:hover {
+  background-color: #0056b3;
+}
+
+.fixed-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+}
+
+.hidden {
+  display: none;
+}
+
+.question-div {
+  transition: all 0.5s ease;
+}
+.question-div-hover {
+  transform: scale(1) translateY(-5px);
+  opacity: 1;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.question-div-selected {
+  transform: scale(1) translateY(-5px);
+  opacity: 0.7;
+  background-color: #f0f0f0;
+}
+.question-div-unhover {
+  transform: scale(1) translateY(5px);
+}
+
+.dialog-header {
+  text-align: center;
+  margin-bottom: 4px;
+}
+.dialog-score {
+  font-weight: bold;
+  text-align: center;
+  font-size: xx-large;
+  margin-bottom: 4px;
+}
+
+.btn-copy {
+  background-color: #28a745;
+}
+
+.qr-code {
+  display: block;
+  margin: 20px auto;
+  max-width: 100%;
+}
+
+.image-caption {
+  color: inherit;
+  z-index: 1;
+  margin: 0;
+  width: 100%;
+  font-weight: bold;
+}
+
+.image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.responsive-image {
+  width: 100%;
+  height: auto;
+  z-index: 0;
+}
+
+/* New CSS for dialog styling */
+.result-dialog {
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  max-width: 600px;
+  margin: auto;
+  text-align: left;
+}
+
+/* 追加されたインラインスタイルの外部化 */
+.question-div-transition {
+  transition: transform 1s ease-in-out, opacity 1s ease-in-out, background-color 1s ease-in-out;
+}
+
+.dialog-header {
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.dialog-score {
+  font-weight: bold;
+  text-align: center;
+  font-size: xx-large;
+  margin-bottom: 4px;
+}
+
+.centered-button {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.qr-code {
+  display: block;
+  margin: 20px auto;
+  max-width: 100%;
+}
+
+.btn-copy {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  background-color: #28a745;
+}
+
+.image-caption {
+  color: inherit;
+  z-index: 1;
+  margin: 0;
+  width: 100%;
+  font-weight: bold;
+}
+
+.image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.responsive-image {
+  width: 100%;
+  height: auto;
+  z-index: 0;
+}
+
+/* ダイアログ全体のスタイル */
+.result-dialog {
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: auto;
+    text-align: left;
+}
+
+/* ダイアログのヘッドライン */
+.dialog-headline {
+    text-align: center;
+    margin-bottom: 4px;
+}
+
+/* トータルスコアのスタイル */
+.dialog-score {
+    font-weight: bold;
+    text-align: center;
+    font-size: xx-large;
+    margin-bottom: 4px;
+}
+
+/* 閉じるボタンのスタイル */
+.dialog-close-button {
+    display: block;
+    margin: 10px auto;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.dialog-close-button:hover {
+    background-color: #218838;
+}
+
+/* QRコード画像のスタイル */
+.qr-code-image {
+    display: block;
+    margin: 20px auto;
+    max-width: 100%;
+}
+
+/* URLをコピーするボタンのスタイル */
+.copy-url-button {
+    display: block;
+    margin: 10px auto;
+    padding: 10px 20px;
+    background-color: #28a745; /* 緑色 */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 16px;
+}
+
+.copy-url-button:hover {
+    background-color: #218838; /* ホバー時の色 */
+}
+
+/* 画像とキャプションを含むコンテナのスタイル */
+.image-caption-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin: 10px 0;
+}
+
+/* キャプションテキストのスタイル */
+.caption-text {
+    z-index: 1;
+    margin: 0;
+    width: 100%;
+    font-weight: bold;
+}
+
+/* 画像のスタイル */
+.caption-image {
+    width: 100%;
+    height: auto;
+    z-index: 0;
 }

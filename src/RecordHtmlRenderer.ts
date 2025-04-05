@@ -25,15 +25,7 @@ class RecordHtmlRenderer {
     static createButton(label: string): HTMLButtonElement {
         const button = document.createElement("button");
         button.textContent = label;
-        button.style.padding = "10px 20px";
-        button.style.backgroundColor = "#007BFF";
-        button.style.color = "white";
-        button.style.border = "none";
-        button.style.borderRadius = "5px";
-        button.style.cursor = "pointer";
-        button.style.transition = "background-color 0.3s ease";
-        button.onmouseover = () => button.style.backgroundColor = "#0056b3";
-        button.onmouseout = () => button.style.backgroundColor = "#007BFF";
+        button.className = "btn";
 
         return button;
 
@@ -116,6 +108,7 @@ class RecordHtmlRenderer {
         const title = document.createElement("h1");
         title.textContent = C.ProductName + C.Subtitle;
         parentElement.appendChild(title);
+        let wholeIndexCount = 0;
 
         categories.forEach((category) => {
             const categoryClass = this.getCategoryClass(category);
@@ -127,9 +120,11 @@ class RecordHtmlRenderer {
             const items = this.recordData.getItemsByCategory(category);
 
             items.forEach((item, index) => {
+                wholeIndexCount += 1;
                 const questionDiv = document.createElement("div");
                 questionDiv.className = categoryClass;
-                questionDiv.style.transition = "all 0.5s ease";
+                questionDiv.classList.add("question-div");
+                questionDiv.id = `index_${wholeIndexCount}`;
 
                 const questionText = document.createElement("p");
 
@@ -140,16 +135,17 @@ class RecordHtmlRenderer {
                 questionDiv.appendChild(questionText);
 
                 const form = document.createElement("form");
-                form.setAttribute("data-question-form", item.レコード番号.S);
+                form.setAttribute("next_index", (wholeIndexCount + 1).toString());
+
+                const record_number = item.レコード番号.S;
+                form.setAttribute("data-question-form", record_number);
                 questionDiv.appendChild(form);
 
                 // 選択肢をラジオボタンとして追加
                 item.選択肢テーブル.L.forEach((choice, optionNumber) => {
                     // const choiceId = (choice.M.id as SValue).S;
-                    const record_number = item.レコード番号.S
                     let choiceText = (choice.M.value.M.回答項目.M.value as SValue).S;
                     const choiceValue = (choice.M.value.M.リスクポイント.M.value as SValue).S;
-                    // const optionNumber = (choice.M.value.M.選択肢番号.M.value as SValue).S;
 
                     const label = document.createElement("label");
                     const input = document.createElement("input");
@@ -184,35 +180,37 @@ class RecordHtmlRenderer {
                             questionText.textContent = `✅ 質問 ${index + 1}: ${item.質問文.S} - 選択: ${choiceText}`;
 
                             // 選択肢とフォームを非表示
-                            form.style.display = "none";
+                            form.classList.add("hidden");
 
                             // 質問ブロック全体をアニメーションして縮小
-                            questionDiv.style.transition = "transform 1s ease-in-out, opacity 1s ease-in-out, background-color 1s ease-in-out";
+                            questionDiv.classList.add("question-div-transition", "question-div-selected");
 
-                            questionDiv.style.transform = "scale(1) translateY(-5px)";
-                            questionDiv.style.opacity = "0.7";
-                            questionDiv.style.backgroundColor = "#f0f0f0"; // 背景色を変更
+                            // 次の質問のインデックスを取得
+                            const nextIndex = parseInt(form.getAttribute("next_index") || "0", 10);
+
+                            // 次の質問までスクロールする
+                            const nextQuestionDiv = parentElement.querySelector(`div[id="index_${nextIndex}"]`);
+                            console.log({ nextIndex, nextQuestionDiv });
+                            if (nextQuestionDiv) {
+                                nextQuestionDiv.scrollIntoView({ behavior: "smooth", block: "start" });
+                            }
+                            // 選択肢を非表示にする
                         }
                     });
                 });
 
                 // ホバー時のスタイル追加
                 questionDiv.addEventListener("mouseenter", () => {
-                    questionDiv.style.transform = "scale(1) translateY(-5px)";
-                    questionDiv.style.opacity = "1";
-                    questionDiv.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)";
+                    questionDiv.classList.add("question-div-hover");
                 });
 
                 // マウスアウト時のスタイル追加
                 questionDiv.addEventListener("mouseleave", () => {
-                    const hasCheckedInput = questionDiv.querySelector('input[type=radio]:checked');
-                    if (hasCheckedInput != null) {
-                        questionDiv.style.transform = "scale(1) translateY(-5px)";
-                        questionDiv.style.opacity = "0.7";
-                        questionDiv.style.boxShadow = "none";
-                    }
-                    else {
-                        questionDiv.style.transform = "scale(1) translateY(5px)";
+                    questionDiv.classList.remove("question-div-hover");
+                    if (questionDiv.querySelector('input[type=radio]:checked') != null) {
+                        questionDiv.classList.add("question-div-selected");
+                    } else {
+                        questionDiv.classList.add("question-div-unhover");
                     }
                 });
 
@@ -221,7 +219,7 @@ class RecordHtmlRenderer {
                     const hasCheckedInput = questionDiv.querySelector('input[type=radio]:checked');
 
                     if (hasCheckedInput != null) {
-                        form.style.display = "block";
+                        form.classList.remove("hidden");
                         questionText.textContent = `質問 ${index + 1}: ${item.質問文.S}`;
                         // questionDiv.style.transform = "scale(1)";
                         // questionDiv.style.opacity = "1";
@@ -234,9 +232,7 @@ class RecordHtmlRenderer {
 
         // 採点ボタン
         const button = RecordHtmlRenderer.createButton("採点する");
-        button.style.position = "fixed";
-        button.style.bottom = "20px";
-        button.style.right = "20px";
+        button.classList.add("fixed-button");
 
         parentElement.appendChild(button);
 
@@ -338,34 +334,24 @@ class RecordHtmlRenderer {
 
                 // high risk / low riskメッセージを、いい感じのダイアログで表示する
                 const dialog = document.createElement('dialog');
-                dialog.style.padding = '20px';
-                dialog.style.borderRadius = '8px';
-                dialog.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
-                dialog.style.maxWidth = '600px';
-                dialog.style.margin = 'auto';
-                dialog.style.textAlign = 'left';
-                // dialog.style.fontSize = '14px';
+                dialog.className = 'result-dialog';
 
                 // トータルスコア
                 const scoreParagraph = document.createElement('p');
                 const headline = document.createElement('h2');
                 headline.textContent = 'あなたの生活困窮リスクポイント';
-                headline.style.textAlign = 'center';
-                headline.style.marginBottom = '4px';
+                headline.className = 'dialog-headline';
                 dialog.appendChild(headline);
 
                 scoreParagraph.innerHTML = `${totalScore} RP`;
-                scoreParagraph.style.fontWeight = 'bold';
-                scoreParagraph.style.textAlign = 'center';
-                scoreParagraph.style.fontSize = 'xx-large';
-                scoreParagraph.style.marginBottom = '4px';
+                scoreParagraph.className = 'dialog-score';
+                dialog.appendChild(scoreParagraph);
 
                 // 閉じるボタン
                 const closeButton = RecordHtmlRenderer.createButton('閉じる');
-                closeButton.style.display = 'block';
-                closeButton.style.marginLeft = 'auto';
-                closeButton.style.marginRight = 'auto';
+                closeButton.className = 'dialog-close-button';
                 closeButton.onclick = () => dialog.close();
+                dialog.appendChild(closeButton);
 
                 // 表示する画像を取得する
                 const highRiskImage = calculator.getCategoryImageName(maxCategory);
@@ -379,32 +365,27 @@ class RecordHtmlRenderer {
 
                 dialog.appendChild(lowRiskResult);
 
+                // 現在のURLから、#を除いたURLを取得する
+                const currentUrl = window.location.href.split("#")[0];
+
                 // ダイアログの下部に現在のURLをQRコードとして表示する
-                const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.href)}`;
+                const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(currentUrl)}`;
                 const qrCodeImage = document.createElement('img');
                 qrCodeImage.src = qrCodeUrl;
                 qrCodeImage.alt = 'QRコード';
-                qrCodeImage.style.display = 'block';
-                qrCodeImage.style.margin = '20px auto';
-                qrCodeImage.style.maxWidth = '100%';
-
+                qrCodeImage.className = 'qr-code-image'; // クラス名を追加
                 dialog.appendChild(qrCodeImage);
 
                 // URLをクリップボードにコピーするボタンを配置する
                 const copyButton = RecordHtmlRenderer.createButton('URLをコピーする');
-                copyButton.style.display = 'block';
+                copyButton.className = 'copy-url-button'; // クラス名を追加
                 copyButton.onclick = () => {
-                    navigator.clipboard.writeText(window.location.href).then(() => {
+                    navigator.clipboard.writeText(currentUrl).then(() => {
                         alert('URLがクリップボードにコピーされました。');
                     }).catch(err => {
                         console.error('URLのコピーに失敗しました: ', err);
                     });
                 };
-                copyButton.style.marginLeft = 'auto';
-                copyButton.style.marginRight = 'auto';
-                copyButton.style.marginTop = '10px';
-                copyButton.style.marginBottom = '10px';
-                copyButton.style.backgroundColor = '#28a745'; // 緑色に変更
                 dialog.appendChild(copyButton);
 
                 // ダイアログの下部に閉じるボタンを追加
@@ -423,25 +404,19 @@ class RecordHtmlRenderer {
     // img要素とp要素を受け取り、画像の上にP要素を重ねた要素を作成して返す
     private createImageWithCaption(imageFilename: string, caption: string, label: string, color: string): HTMLDivElement {
         // url形式にする
-        const imageUrl = `./img/${imageFilename}`
+        const imageUrl = `./img/${imageFilename}`;
 
         const lowRiskParagraph = document.createElement('p');
         lowRiskParagraph.innerHTML = `<h3>${label}:</h3>${caption}`;
-        lowRiskParagraph.style.color = color;
-        lowRiskParagraph.style.zIndex = "1";
-        lowRiskParagraph.style.margin = "0";
-        lowRiskParagraph.style.width = "100%"; // 画像と同じ横幅に設定
-        lowRiskParagraph.style.fontWeight = "bold";
+        lowRiskParagraph.className = 'caption-text'; // クラス名を追加
+        lowRiskParagraph.style.color = color; // 色は動的に設定
 
         const container = document.createElement("div");
-        container.style.justifyContent = "center";
-        container.style.alignItems = "center";
+        container.className = 'image-caption-container'; // クラス名を追加
 
         const image = document.createElement("img");
         image.src = imageUrl;
-        image.style.width = "100%";
-        image.style.height = "auto";
-        image.style.zIndex = "0";
+        image.className = 'caption-image'; // クラス名を追加
 
         container.appendChild(image);
         container.appendChild(lowRiskParagraph);
