@@ -170,3 +170,61 @@ input[type="radio"] {
   margin: auto;
   text-align: left;
 }
+
+/* 追加されたインラインスタイルの外部化 */
+.question-div-transition {
+  transition: transform 1s ease-in-out, opacity 1s ease-in-out, background-color 1s ease-in-out;
+}
+
+.dialog-header {
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.dialog-score {
+  font-weight: bold;
+  text-align: center;
+  font-size: xx-large;
+  margin-bottom: 4px;
+}
+
+.centered-button {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.qr-code {
+  display: block;
+  margin: 20px auto;
+  max-width: 100%;
+}
+
+.btn-copy {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  background-color: #28a745;
+}
+
+.image-caption {
+  color: inherit;
+  z-index: 1;
+  margin: 0;
+  width: 100%;
+  font-weight: bold;
+}
+
+.image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.responsive-image {
+  width: 100%;
+  height: auto;
+  z-index: 0;
+}

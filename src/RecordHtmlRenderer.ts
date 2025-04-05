@@ -179,11 +179,7 @@ class RecordHtmlRenderer {
                             form.classList.add("hidden");
 
                             // 質問ブロック全体をアニメーションして縮小
-                            questionDiv.style.transition = "transform 1s ease-in-out, opacity 1s ease-in-out, background-color 1s ease-in-out";
-
-                            questionDiv.classList.add("question-div-selected");
-                            questionDiv.style.opacity = "0.7";
-                            questionDiv.style.backgroundColor = "#f0f0f0"; // 背景色を変更
+                            questionDiv.classList.add("question-div-transition", "question-div-selected");
                         }
                     });
                 });
