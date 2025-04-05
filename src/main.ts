@@ -71,8 +71,6 @@ function opening(debugMode: boolean = false) {
     version.style.bottom = '10px';
     version.style.right = '10px';
     version.style.zIndex = '1000';
-    version.style.pointerEvents = 'none'; // クリックを無視
-    version.style.userSelect = 'none'; // 選択を無効化
     dialog.appendChild(version);
     // ダイアログを画面の中央に配置
 

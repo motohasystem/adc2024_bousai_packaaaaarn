@@ -31,8 +31,8 @@ export class CategoriesImageStore {
             low: 'family_low.webp'
         },
         'その他': {
-            high: 'other_high.webp',
-            low: 'other_low.webp'
+            high: 'etc_high.webp',
+            low: 'etc_low.webp'
         }
     }
 
