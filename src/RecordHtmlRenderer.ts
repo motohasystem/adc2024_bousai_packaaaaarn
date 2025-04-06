@@ -235,9 +235,6 @@ class RecordHtmlRenderer {
         // 採点ロジック
         button.addEventListener("click", () => this.calculateScore(parentElement));
         parentElement.appendChild(button);
-
-        // 採点ロジック
-        button.addEventListener("click", () => this.calculateScore(parentElement));
     }
 
     // 採点ボタンがクリックされたときの処理
