@@ -74,6 +74,9 @@ input[type="radio"] {
   div {
     font-size: 1.1em;
   }
+  button {
+    font-size: 1.3em;
+  }
 }
 
 /* ダイアログのヘッドライン */

@@ -105,6 +105,7 @@ class RecordHtmlRenderer {
         const title = document.createElement("h1");
         title.textContent = C.ProductName + C.Subtitle;
         parentElement.appendChild(title);
+        let wholeIndexCount = 0;
 
         categories.forEach((category) => {
             const categoryClass = this.getCategoryClass(category);
@@ -116,9 +117,11 @@ class RecordHtmlRenderer {
             const items = this.recordData.getItemsByCategory(category);
 
             items.forEach((item, index) => {
+                wholeIndexCount += 1;
                 const questionDiv = document.createElement("div");
                 questionDiv.className = categoryClass;
-                questionDiv.style.transition = "all 0.5s ease";
+                questionDiv.classList.add("question-div");
+                questionDiv.id = `index_${wholeIndexCount}`;
 
                 const questionText = document.createElement("p");
 
@@ -129,16 +132,17 @@ class RecordHtmlRenderer {
                 questionDiv.appendChild(questionText);
 
                 const form = document.createElement("form");
-                form.setAttribute("data-question-form", item.レコード番号.S);
+                form.setAttribute("next_index", (wholeIndexCount + 1).toString());
+
+                const record_number = item.レコード番号.S;
+                form.setAttribute("data-question-form", record_number);
                 questionDiv.appendChild(form);
 
                 // 選択肢をラジオボタンとして追加
                 item.選択肢テーブル.L.forEach((choice, optionNumber) => {
                     // const choiceId = (choice.M.id as SValue).S;
-                    const record_number = item.レコード番号.S
                     let choiceText = (choice.M.value.M.回答項目.M.value as SValue).S;
                     const choiceValue = (choice.M.value.M.リスクポイント.M.value as SValue).S;
-                    // const optionNumber = (choice.M.value.M.選択肢番号.M.value as SValue).S;
 
                     const label = document.createElement("label");
                     const input = document.createElement("input");
@@ -173,35 +177,37 @@ class RecordHtmlRenderer {
                             questionText.textContent = `✅ 質問 ${index + 1}: ${item.質問文.S} - 選択: ${choiceText}`;
 
                             // 選択肢とフォームを非表示
-                            form.style.display = "none";
+                            form.classList.add("hidden");
 
                             // 質問ブロック全体をアニメーションして縮小
-                            questionDiv.style.transition = "transform 1s ease-in-out, opacity 1s ease-in-out, background-color 1s ease-in-out";
+                            questionDiv.classList.add("question-div-transition", "question-div-selected");
 
-                            questionDiv.style.transform = "scale(1) translateY(-5px)";
-                            questionDiv.style.opacity = "0.7";
-                            questionDiv.style.backgroundColor = "#f0f0f0"; // 背景色を変更
+                            // 次の質問のインデックスを取得
+                            const nextIndex = parseInt(form.getAttribute("next_index") || "0", 10);
+
+                            // 次の質問までスクロールする
+                            const nextQuestionDiv = parentElement.querySelector(`div[id="index_${nextIndex}"]`);
+                            console.log({ nextIndex, nextQuestionDiv });
+                            if (nextQuestionDiv) {
+                                nextQuestionDiv.scrollIntoView({ behavior: "smooth", block: "start" });
+                            }
+                            // 選択肢を非表示にする
                         }
                     });
                 });
 
                 // ホバー時のスタイル追加
                 questionDiv.addEventListener("mouseenter", () => {
-                    questionDiv.style.transform = "scale(1) translateY(-5px)";
-                    questionDiv.style.opacity = "1";
-                    questionDiv.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)";
+                    questionDiv.classList.add("question-div-hover");
                 });
 
                 // マウスアウト時のスタイル追加
                 questionDiv.addEventListener("mouseleave", () => {
-                    const hasCheckedInput = questionDiv.querySelector('input[type=radio]:checked');
-                    if (hasCheckedInput != null) {
-                        questionDiv.style.transform = "scale(1) translateY(-5px)";
-                        questionDiv.style.opacity = "0.7";
-                        questionDiv.style.boxShadow = "none";
-                    }
-                    else {
-                        questionDiv.style.transform = "scale(1) translateY(5px)";
+                    questionDiv.classList.remove("question-div-hover");
+                    if (questionDiv.querySelector('input[type=radio]:checked') != null) {
+                        questionDiv.classList.add("question-div-selected");
+                    } else {
+                        questionDiv.classList.add("question-div-unhover");
                     }
                 });
 
@@ -210,7 +216,7 @@ class RecordHtmlRenderer {
                     const hasCheckedInput = questionDiv.querySelector('input[type=radio]:checked');
 
                     if (hasCheckedInput != null) {
-                        form.style.display = "block";
+                        form.classList.remove("hidden");
                         questionText.textContent = `質問 ${index + 1}: ${item.質問文.S}`;
                         // questionDiv.style.transform = "scale(1)";
                         // questionDiv.style.opacity = "1";
@@ -355,10 +361,11 @@ class RecordHtmlRenderer {
 
                 dialog.appendChild(scoreParagraph);
                 dialog.appendChild(highRiskResult);
-
                 dialog.appendChild(lowRiskResult);
+
                 // ダイアログの下部に現在のURLをQRコードとして表示する
-                const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.href)}`;
+                const currentUrl = window.location.href;
+                const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(currentUrl)}`;
                 const qrCodeImage = document.createElement('img');
                 qrCodeImage.src = qrCodeUrl;
                 qrCodeImage.alt = 'QRコード';
@@ -369,7 +376,7 @@ class RecordHtmlRenderer {
                 const copyButton = RecordHtmlRenderer.createButton('URLをコピーする');
                 copyButton.className = 'copy-url-button'; // クラス名を追加
                 copyButton.onclick = () => {
-                    navigator.clipboard.writeText(window.location.href).then(() => {
+                    navigator.clipboard.writeText(currentUrl).then(() => {
                         alert('URLがクリップボードにコピーされました。');
                     }).catch(err => {
                         console.error('URLのコピーに失敗しました: ', err);
