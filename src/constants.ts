@@ -1,5 +1,5 @@
 export const CONSTANTS = {
-    VERSION: '0.2.0',
+    VERSION: '0.2.1',
     API_URL: 'https://f56gy9u3sa.execute-api.ap-northeast-1.amazonaws.com/dev/items',
     API_KEY: import.meta.env.VITE_API_KEY || '',
     ProjectName: 'All-Day Communities Project 2024',
