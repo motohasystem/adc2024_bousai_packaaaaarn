@@ -43,7 +43,7 @@ function opening(debugMode: boolean = false) {
     dialog.style.width = '80%';
     dialog.style.maxWidth = '800px';
     dialog.innerHTML = `
-    <img src="./img/title.webp" alt="Kitten" width="100%" style="max-width: 800px;"/>
+    <img src="./img/title_packarrrn.png" alt="Kitten" width="100%" style="max-width: 800px;"/>
     <h2>${C.ProjectName} / ${C.ProductName}について</h2>
     <p>${M.OPENING}</p>
     <p>それでは、始めましょう！</p>
