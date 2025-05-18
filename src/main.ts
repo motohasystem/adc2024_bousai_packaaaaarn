@@ -42,11 +42,14 @@ function opening(debugMode: boolean = false) {
     dialog.classList.add('opening-dialog');
     dialog.style.width = '80%';
     dialog.style.maxWidth = '800px';
+
+    // CONST.MESSAGES.OPENINGの文字列配列をp要素として構築
+    const openingText = M.OPENING.map(message => `<p>${message}</p>`).join('');
+
     dialog.innerHTML = `
-    <img src="./img/title_packarrrn.png" alt="Kitten" width="100%" style="max-width: 800px;"/>
+    <img id="opening-title-image" src="./img/title_packarrrn.png" alt="ぼうさいパッカーンのオープニングタイトル画像"/>
     <h2>${C.ProjectName} / ${C.ProductName}について</h2>
-    <p>${M.OPENING}</p>
-    <p>それでは、始めましょう！</p>
+    ${openingText}
   `;
     const button = RecordHtmlRenderer.createButton('閉じる');
     button.classList.add('close-dialog');
